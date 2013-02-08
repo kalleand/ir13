@@ -1,0 +1,23 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[swedish]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\author{Karl Johan Andreasson}
+\title{Assignment 1.4}
+\begin{document}
+\maketitle
+\textbf{Suppose	you	were	 asked to make and educated guess on how Google processes multiword and phrase queries in their search engine. How would you go about finding that out only by querying the Google search engine in various ways? Suggest a methodology.}
+
+First off we can conclude that when the user queries something like \texttt{``november eller december''} Google performs a phrase query just like the one in task 1.3 in the lab. This can be proven by both querying Google with a valid query (one that should return a result) such as \texttt{``november eller december''} and noticing that every search result has the query as a phrase in the document. The other query that should be made to have conclusive evidence that Google only uses a phrase query when the query is in quotation marks is to query Google with something bogus; such as \texttt{``november kaka och en liten''} (basically something that doesn't make any sense), here we get no results found for our query. However Google suggests a query without the quotation marks where results are found.
+
+
+To find out what Google use when a user queries something without any quotation marks, a good start is to observe what Google presents as result when queried a valid query such as \texttt{november eller december}. Here we can see that google use either a intersection query or a union query where results are scored on the authority of the site, if the result is in the title and the age of the document. To see if Google uses an intersection query or a union query we query Google for something bogus together with a valid word. An example of this query is \texttt{kaka aksldaksdlashggtttt}; here we can see that Google returns with 0 results even though \texttt{kaka} alone results around 79 million results. Therefore we can rule out union queries as a tool which Google uses.
+
+An odd observation can be made if one query Google with \texttt{november eller december oktober}, this results in 125 million results. However, the query \texttt{november eller december} gives around 82 million results. In my opinion this suggests that google performs varying strict in its threshold to become a search result depending on ``the score'' of the best one (Maybe only show result that is half as good as the best result).
+
+If we query Google with a single word such as \texttt{kakor} we can see that Google seems to be prioritizing documents that have that word several times in the same document together. This suggests that Google saves the number of occurrences of the word in the its inverted indices. It is not that out of line to guess that Google counts occurrences by checking length of the container of offsets of the word in the document. 
+
+\end{document}

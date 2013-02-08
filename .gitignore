@@ -1,4 +1,10 @@
 *.class
+*.data
+*.index
+*.gz
+*.log
+*.aux
+*.pdf
 
 # Package Files #
 *.jar
