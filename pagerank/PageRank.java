@@ -220,7 +220,9 @@ public class PageRank{
             }
         }
 
-        double[] x = powerIteration(numberOfDocs);
+        // double[] x = powerIteration(numberOfDocs); /* 2.3 */
+        double[] x = approxPageRank(numberOfDocs); /* 2.4 part 1 */
+
 
 
         ArrayList<CompareObj> al = new ArrayList<CompareObj>();
@@ -233,7 +235,7 @@ public class PageRank{
 
         for(int i = 0; i < 50; i++)
         {
-            System.out.println((i+1) + ". " + docName[al.get(i).key] + " : " + al.get(i).val);
+            System.out.println((i+1) + ".\t" + docName[al.get(i).key] + "\t" + al.get(i).val);
         }
 
         /*
@@ -243,6 +245,38 @@ public class PageRank{
         }
         */
 
+    }
+
+    private double[] approxPageRank(int numberOfDocs)
+    {
+        double[] x = new double[numberOfDocs];
+        double[] xPrim = new double[numberOfDocs];
+
+        x[0] = 1;
+
+        for(int iters = 0; iters < 1000; iters++)
+        {
+            for(int i = 0; i < numberOfDocs; i++)
+            {
+                // Get the lists i -> j
+                if(out[i] > 0){
+                    Hashtable<Integer, Boolean> outlinks = link.get(i);
+                    for( Integer j : outlinks.keySet() )
+                    {
+                        xPrim[j] += x[i] * C / out[i];
+                    }
+                }
+                xPrim[i] += (1 - C) / numberOfDocs;
+                xPrim[i] += numberOfSinks / (numberOfDocs * numberOfDocs);
+            }
+
+            for(int i = 0; i < numberOfDocs; i++)
+            {
+                x[i] = xPrim[i];
+                xPrim[i] = 0;
+            }
+        }
+        return x;
     }
 
     private double[] powerIteration(int numberOfDocs)
@@ -306,7 +340,7 @@ public class PageRank{
         {
             if( obj instanceof CompareObj )
             {
-                return Double.compare(((CompareObj) obj).val, this.val);
+                return (int) Double.compare(((CompareObj) obj).val, this.val);
             }
             else
             {
