@@ -16,7 +16,7 @@ public class PageRank{
      *   Maximal number of documents. We're assuming here that we
      *   don't have more docs than we can keep in main memory.
      */
-    final static int MAX_NUMBER_OF_DOCS = 2000000;
+    final static int MAX_NUMBER_OF_DOCS = 10000;
     final static double C = 0.85;
 
     /**
@@ -69,6 +69,11 @@ public class PageRank{
      *   of whether the transistion probabilities converge or not.
      */
     final static int MAX_NUMBER_OF_ITERATIONS = 1000;
+
+    /**
+     * G matrix
+     */
+    double[][] gMatrix = new double[MAX_NUMBER_OF_DOCS][MAX_NUMBER_OF_DOCS];
 
 
     /* --------------------------------------------- */
@@ -206,19 +211,6 @@ public class PageRank{
                 }
             }
         }
-        /*
-        for(int i = 0; i < numberOfDocs; i++)
-        {
-            System.out.print("[");
-            for(int j = 0; j < numberOfDocs; j++)
-            {
-                System.out.print(" "+pMatrix[i][j]);
-            }
-            System.out.println(" ]");
-        }
-        */
-
-        double[][] gMatrix = new double[numberOfDocs][numberOfDocs];
 
         for(int i = 0; i < numberOfDocs; i++)
         {
@@ -228,6 +220,33 @@ public class PageRank{
             }
         }
 
+        double[] x = powerIteration(numberOfDocs);
+
+
+        ArrayList<CompareObj> al = new ArrayList<CompareObj>();
+
+        for(int i = 0; i < numberOfDocs; i++)
+        {
+            al.add(new CompareObj(i, x[i]));
+        }
+        Collections.sort(al);
+
+        for(int i = 0; i < 50; i++)
+        {
+            System.out.println((i+1) + ". " + docName[al.get(i).key] + " : " + al.get(i).val);
+        }
+
+        /*
+        for(int i = 0; i < numberOfDocs; i++)
+        {
+            System.out.println(xPrim[i]);
+        }
+        */
+
+    }
+
+    private double[] powerIteration(int numberOfDocs)
+    {
         double[] x = new double[numberOfDocs];
         double[] xPrim = new double[numberOfDocs];
 
@@ -258,28 +277,8 @@ public class PageRank{
             }
 
         }
-        System.out.println("Achieved stable after " + numberOfIter + "iterations.");
-
-        ArrayList<CompareObj> al = new ArrayList<CompareObj>();
-
-        for(int i = 0; i < numberOfDocs; i++)
-        {
-            al.add(new CompareObj(i, xPrim[i]));
-        }
-        Collections.sort(al);
-
-        for(int i = 0; i < 50; i++)
-        {
-            System.out.println((i+1) + ". " + docName[al.get(i).key] + " : " + al.get(i).val);
-        }
-
-        /*
-        for(int i = 0; i < numberOfDocs; i++)
-        {
-            System.out.println(xPrim[i]);
-        }
-        */
-
+        System.out.println("Achieved stable after " + numberOfIter + " iterations.");
+        return xPrim;
     }
 
     private double calculateDiff(double[] a, double[] b, int numberOfDocs)
