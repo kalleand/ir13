@@ -1,4 +1,4 @@
-.PHONY: build, run, irun, drun, clean, move
+.PHONY: build, run, irun, drun, clean, move, buildPagerank, runPagerank
 default: build
 
 ifndef FILES
@@ -33,3 +33,9 @@ ifdef INDEX
 	mv $(INDEX).index $(FILES).index
 	mv $(INDEX).data $(FILES).data
 endif
+
+buildPagerank:
+	javac pagerank/PageRank.java
+
+runPagerank:
+	java pagerank.PageRank svwiki_links/links$(FILES).txt
