@@ -67,7 +67,7 @@ public class MegaIndex implements Index {
                 // No index file names specified. Construct a new index and
                 // invent a name for it.
                 index = manager.createMegaMap( generateFilename(), path, true, false );
-                
+
             }
             else if ( indexfiles.size() == 1 ) {
                 // Read the specified index from file
@@ -159,7 +159,7 @@ public class MegaIndex implements Index {
                         continue;
                     }
                     else if(token.equals("..docLengths")) {
-                        
+
                         HashMap<String,Integer> n = (HashMap<String, Integer>)index.get( "..docLengths" );
                         if( n == null )
                         {
@@ -269,27 +269,16 @@ public class MegaIndex implements Index {
             else if(queryType == Index.RANKED_QUERY)
             {
                 PostingsList result = new PostingsList();
-                
-                if(getPostings(query.terms.getFirst()) == null)
+
+                /*if(getPostings(query.terms.getFirst()) == null)
                 {
                     return result;
-                }
-
-                /*
-                try 
-                {
-                    result = (PostingsList) getPostings(query.terms.getFirst()).clone();
-                }
-                catch (CloneNotSupportedException e)
-                {
-                    System.err.println("Could not clone result!");
-                }
-                */
+                }*/
                 for( String term : query.terms )
                 {
                     result.union((PostingsList) getPostings(term));
                 }
-                
+
                 if(numberOfDocs < 0)
                 {
                     numberOfDocs = docLengths.keySet().size();
@@ -301,13 +290,16 @@ public class MegaIndex implements Index {
                     PostingsList tmp = (PostingsList) getPostings(term);
                     if(tmp == null) continue;
 
-                    double wtq = Math.log10( numberOfDocs / tmp.size() );
+                    double idf = Math.log10( numberOfDocs / tmp.size() );
+
+                    double wtq = Math.log10( 1/* Should be number of occurences in query. */ ) + 1;
+                    wtq*= idf;
                     for ( PostingsEntry pe : tmp.list )
                     {
                         if(pe.offsets.size() != 0)
                         {
-                            result.addScore(pe.docID, (1 + Math.log10(pe.offsets.size())) * wtq);
-                            //result.addScore(pe.docID, pe.offsets.size() * wtq);
+                            result.addScore(pe.docID, (1 + Math.log10(pe.offsets.size())) * idf * wtq);
+                            //result.addScore(pe.docID, pe.offsets.size() * idf);
                         }
                     }
                 }
