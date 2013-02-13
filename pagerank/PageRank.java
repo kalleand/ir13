@@ -166,11 +166,155 @@ public class PageRank{
          * use c = 0.85
          * J_i,j = 1/numberOfDocs
          */
-        double J = 1 / numberOfDocs;
+        double jMatrix = 1 / numberOfDocs;
 
+
+        // Creating P
+        double[][] pMatrix = new double[numberOfDocs][numberOfDocs];
+
+        for(int i = 0; i < numberOfDocs; i++)
+        {
+            // System.out.println(" Starting document number " + i + ".");
+            int numberOfLinks = out[i];
+
+            if(numberOfLinks == 0)
+            {
+                // It is a sink. Every value except this should get 1 / (numberOfDocs - 1)
+                double valueOfLink = 1 / (double) (numberOfDocs - 1);
+                // System.out.println(" This was a sink. Setting value to be " + valueOfLink + ".");
+                for(int j = 0; j < numberOfDocs; j++)
+                {
+                    if(j == i) 
+                        continue;
+                    else
+                        pMatrix[i][j] = valueOfLink;
+                }
+            }
+            else
+            {
+                double valueOfLink = 1 / (double) numberOfLinks;
+
+                Hashtable<Integer, Boolean> outLinks = link.get(i);
+
+                // System.out.println("Setting the outlinks value to be " + valueOfLink + ".");
+                for(Integer key : outLinks.keySet())
+                {
+                    if(outLinks.get(key) == true)
+                    {
+                        pMatrix[i][key] = valueOfLink;
+                    }
+                }
+            }
+        }
+        /*
+        for(int i = 0; i < numberOfDocs; i++)
+        {
+            System.out.print("[");
+            for(int j = 0; j < numberOfDocs; j++)
+            {
+                System.out.print(" "+pMatrix[i][j]);
+            }
+            System.out.println(" ]");
+        }
+        */
+
+        double[][] gMatrix = new double[numberOfDocs][numberOfDocs];
+
+        for(int i = 0; i < numberOfDocs; i++)
+        {
+            for(int j = 0; j < numberOfDocs; j++)
+            {
+                gMatrix[i][j] = C * pMatrix[i][j] + (1 - C) * jMatrix;
+            }
+        }
+
+        double[] x = new double[numberOfDocs];
+        double[] xPrim = new double[numberOfDocs];
+
+        double initValue = 1 / (double) numberOfDocs;
+
+        for(int i = 0; i < numberOfDocs; i++)
+        {
+            xPrim[i] = initValue;
+        }
+
+        int numberOfIter = 0;
+        while(calculateDiff(x,xPrim, numberOfDocs) > EPSILON)
+        {
+            numberOfIter++;
+            for(int i = 0; i < numberOfDocs; i++)
+            {
+                x[i] = xPrim[i];
+            }
+
+            for(int i = 0; i < numberOfDocs; i++)
+            {
+                double newVal = 0;
+                for(int j = 0; j < numberOfDocs; j++)
+                {
+                    newVal += x[j] * gMatrix[j][i];
+                }
+                xPrim[i] = newVal;
+            }
+
+        }
+        System.out.println("Achieved stable after " + numberOfIter + "iterations.");
+
+        ArrayList<CompareObj> al = new ArrayList<CompareObj>();
+
+        for(int i = 0; i < numberOfDocs; i++)
+        {
+            al.add(new CompareObj(i, xPrim[i]));
+        }
+        Collections.sort(al);
+
+        for(int i = 0; i < 50; i++)
+        {
+            System.out.println((i+1) + ". " + docName[al.get(i).key] + " : " + al.get(i).val);
+        }
+
+        /*
+        for(int i = 0; i < numberOfDocs; i++)
+        {
+            System.out.println(xPrim[i]);
+        }
+        */
 
     }
 
+    private double calculateDiff(double[] a, double[] b, int numberOfDocs)
+    {
+        double res = 0;
+        for(int i = 0; i < numberOfDocs; i++)
+        {
+            res += Math.abs(a[i] - b[i]);
+        }
+        return res;
+    }
+
+    private class CompareObj implements Comparable
+    {
+        public int key;
+        public double val;
+
+        public CompareObj(int key, double val)
+        {
+            this.key = key;
+            this.val = val;
+        }
+
+        public int compareTo(Object obj)
+        {
+            if( obj instanceof CompareObj )
+            {
+                return Double.compare(((CompareObj) obj).val, this.val);
+            }
+            else
+            {
+                return -1;
+            }
+        }
+    }
 
     /* --------------------------------------------- */
 
