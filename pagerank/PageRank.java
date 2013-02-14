@@ -171,9 +171,9 @@ public class PageRank{
      *   Computes the pagerank of each document.
      */
     void computePagerank( int numberOfDocs ) {
-        double[] x = powerIteration(numberOfDocs); /* 2.3 */
+        // double[] x = powerIteration(numberOfDocs); /* 2.3 */
         // double[] x = approxPageRank(numberOfDocs); /* 2.4 part 1 */
-        // double[] x = monteCarlo(numberOfDocs); /* 2.4 part 2 */
+        double[] x = monteCarlo(numberOfDocs); /* 2.4 part 2 */
 
 
 
