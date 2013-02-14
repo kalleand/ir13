@@ -38,4 +38,8 @@ buildPagerank:
 	javac pagerank/PageRank.java
 
 runPagerank:
+ifeq ($(FILES), all)
+	java pagerank.PageRank svwiki_links/links.txt
+else
 	java pagerank.PageRank svwiki_links/links$(FILES).txt
+endif
