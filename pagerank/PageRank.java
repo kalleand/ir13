@@ -17,7 +17,7 @@ public class PageRank{
      *   Maximal number of documents. We're assuming here that we
      *   don't have more docs than we can keep in main memory.
      */
-    final static int MAX_NUMBER_OF_DOCS = 10000;
+    final static int MAX_NUMBER_OF_DOCS = 1000000;
 
     /**
      *   Mapping from document names to document numbers.
@@ -41,6 +41,8 @@ public class PageRank{
      *   key i is null.
      */
     Hashtable<Integer,Hashtable<Integer,Boolean>> link = new Hashtable<Integer,Hashtable<Integer,Boolean>>();
+
+    public HashMap<String, Double> result = new HashMap<String, Double>();
 
     /**
      *   The number of outlinks from each node.
@@ -78,7 +80,8 @@ public class PageRank{
     /**
      * G matrix
      */
-    double[][] gMatrix = new double[MAX_NUMBER_OF_DOCS][MAX_NUMBER_OF_DOCS];
+    //double[][] gMatrix = new double[MAX_NUMBER_OF_DOCS][MAX_NUMBER_OF_DOCS];
+    double[][] gMatrix = new double[10000][10000];
 
 
     /* --------------------------------------------- */
@@ -184,17 +187,29 @@ public class PageRank{
         ArrayList<CompareObj> al = new ArrayList<CompareObj>();
         for(int i = 0; i < numberOfDocs; i++)
         {
-            al.add(new CompareObj(i, x[i]));
+            al.add(new CompareObj(docName[i], x[i]));
         }
         Collections.sort(al);
 
+        /*
         // Prints the 50 top scores.
         for(int i = 0; i < 50; i++)
         {
             // We want the docName instead of the docNumber because docNumber can differ
             // between executions of the pagerank whereas docName stays the same.
             // (Both are Integers of links1000.txt and links10000.txt)
-            System.out.println((i+1) + ".\t" + docName[al.get(i).key] + "\t" + al.get(i).val);
+            System.out.println((i+1) + ".\t" + al.get(i).name + "\t" + al.get(i).val);
+        }
+        */
+        for(CompareObj co : al)
+        {
+            if(Integer.parseInt(co.name) < 1000)
+            {
+                //System.out.println("svwiki/files/1000/"+co.name+".txt");
+                result.put("svwiki/files/1000/"+co.name+".txt", co.val);
+            }
+            else
+                break;
         }
     }
 
@@ -401,12 +416,12 @@ public class PageRank{
 
     private class CompareObj implements Comparable
     {
-        public int key;
+        public String name;
         public double val;
 
-        public CompareObj(int key, double val)
+        public CompareObj(String name, double val)
         {
-            this.key = key;
+            this.name = name;
             this.val = val;
         }
 
@@ -414,13 +429,26 @@ public class PageRank{
         {
             if( obj instanceof CompareObj )
             {
-                return (int) Double.compare(((CompareObj) obj).val, this.val);
+                int a = Integer.parseInt(this.name);
+                int b = Integer.parseInt(((CompareObj) obj).name);
+                if(a < b)
+                    return -1;
+                if(a > b)
+                    return 1;
+                else
+                    return 0;
+                //return (int) Double.compare(((CompareObj) obj).val, this.val);
             }
             else
             {
                 return -1;
             }
         }
+    }
+
+    public HashMap<String, Double> getPagerank()
+    {
+        return result;
     }
 
     /* --------------------------------------------- */
