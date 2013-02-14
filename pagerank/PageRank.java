@@ -10,6 +10,7 @@ package pagerank;
 import java.util.*;
 import java.io.*;
 
+
 public class PageRank{
 
     /**  
@@ -17,7 +18,6 @@ public class PageRank{
      *   don't have more docs than we can keep in main memory.
      */
     final static int MAX_NUMBER_OF_DOCS = 10000;
-    final static double C = 0.85;
 
     /**
      *   Mapping from document names to document numbers.
@@ -57,6 +57,11 @@ public class PageRank{
      *   following links, and take a random jump somewhere.
      */
     final static double BORED = 0.15;
+
+    /**
+     * Probability of staying and continue to jump.
+     */
+    final static double C = (1-BORED);
 
     /**
      *   Convergence criterion: Transition probabilities do not 
@@ -166,27 +171,44 @@ public class PageRank{
      *   Computes the pagerank of each document.
      */
     void computePagerank( int numberOfDocs ) {
-        /**
-         * Compute P where P is the transition matrix
-         * use c = 0.85
-         * J_i,j = 1/numberOfDocs
-         */
-        double jMatrix = 1 / numberOfDocs;
+        double[] x = powerIteration(numberOfDocs); /* 2.3 */
+        // double[] x = approxPageRank(numberOfDocs); /* 2.4 part 1 */
+        // double[] x = monteCarlo(numberOfDocs); /* 2.4 part 2 */
 
 
-        // Creating P
-        double[][] pMatrix = new double[numberOfDocs][numberOfDocs];
 
+        // Store our result in an ArrayList (any class implementing
+        // Collections would do) to sort it using library sorting
+        // function. To be able to do this we use a inner class 
+        // which implements Comparable.
+        ArrayList<CompareObj> al = new ArrayList<CompareObj>();
         for(int i = 0; i < numberOfDocs; i++)
         {
-            // System.out.println(" Starting document number " + i + ".");
-            int numberOfLinks = out[i];
+            al.add(new CompareObj(i, x[i]));
+        }
+        Collections.sort(al);
 
+        // Prints the 50 top scores.
+        for(int i = 0; i < 50; i++)
+        {
+            // We want the docName instead of the docNumber because docNumber can differ
+            // between executions of the pagerank whereas docName stays the same.
+            // (Both are Integers of links1000.txt and links10000.txt)
+            System.out.println((i+1) + ".\t" + docName[al.get(i).key] + "\t" + al.get(i).val);
+        }
+    }
+
+    private void generateG(int numberOfDocs)
+    {
+        double jMatrix = 1 / numberOfDocs;
+        // Creating P
+        double[][] pMatrix = new double[numberOfDocs][numberOfDocs];
+        for(int i = 0; i < numberOfDocs; i++)
+        {
+            int numberOfLinks = out[i];
             if(numberOfLinks == 0)
             {
-                // It is a sink. Every value except this should get 1 / (numberOfDocs - 1)
                 double valueOfLink = 1 / (double) (numberOfDocs - 1);
-                // System.out.println(" This was a sink. Setting value to be " + valueOfLink + ".");
                 for(int j = 0; j < numberOfDocs; j++)
                 {
                     if(j == i) 
@@ -198,10 +220,7 @@ public class PageRank{
             else
             {
                 double valueOfLink = 1 / (double) numberOfLinks;
-
                 Hashtable<Integer, Boolean> outLinks = link.get(i);
-
-                // System.out.println("Setting the outlinks value to be " + valueOfLink + ".");
                 for(Integer key : outLinks.keySet())
                 {
                     if(outLinks.get(key) == true)
@@ -212,6 +231,7 @@ public class PageRank{
             }
         }
 
+        // Creating G. 
         for(int i = 0; i < numberOfDocs; i++)
         {
             for(int j = 0; j < numberOfDocs; j++)
@@ -219,41 +239,85 @@ public class PageRank{
                 gMatrix[i][j] = C * pMatrix[i][j] + (1 - C) * jMatrix;
             }
         }
+    }
 
-        // double[] x = powerIteration(numberOfDocs); /* 2.3 */
-        double[] x = approxPageRank(numberOfDocs); /* 2.4 part 1 */
+    /**
+     * MC v 4
+     */
+    private double[] monteCarlo(int numberOfDocs)
+    {
+        int mMax = 100;
+        int maxLength = 5;
+
+        int totalNumberOfVisits = 0;
+
+        Random rand = new Random();
+
+        int[] numberOfVisits = new int[numberOfDocs];
 
 
-
-        ArrayList<CompareObj> al = new ArrayList<CompareObj>();
-
+        for(int m = 0; m < mMax; m++)
+        {
+            for(int n = 0; n < numberOfDocs; n++)
+            {
+                int currentPage = n;
+                for(int i = 0; i < maxLength; i++)
+                {
+                    numberOfVisits[currentPage]++;
+                    totalNumberOfVisits++;
+                    if(out[currentPage] == 0)
+                    {
+                        // This is a sink.
+                        break;
+                    }
+                    else
+                    {
+                        // Gå till nästa.
+                        // Antingen hoppa till nästa länk eller till en random sida.
+                        if(rand.nextDouble() < C)
+                        {
+                            Hashtable<Integer, Boolean> table = link.get(currentPage);
+                            int next = rand.nextInt(table.size());
+                            int a = 0;
+                            for(Integer j : table.keySet())
+                            {
+                                if(a == next)
+                                {
+                                    currentPage = j;
+                                    break;
+                                }
+                                a++;
+                            }
+                        }
+                        else
+                        {
+                            int next = rand.nextInt(numberOfDocs);
+                            while(next == currentPage)
+                            {
+                                next = rand.nextInt(numberOfDocs);
+                            }
+                            currentPage = next;
+                        }
+                    }
+                }
+            }
+        }
+        double[] ret = new double[numberOfDocs];
         for(int i = 0; i < numberOfDocs; i++)
         {
-            al.add(new CompareObj(i, x[i]));
+            ret[i] = (double) numberOfVisits[i] / (double) totalNumberOfVisits;
         }
-        Collections.sort(al);
-
-        for(int i = 0; i < 50; i++)
-        {
-            System.out.println((i+1) + ".\t" + docName[al.get(i).key] + "\t" + al.get(i).val);
-        }
-
-        /*
-        for(int i = 0; i < numberOfDocs; i++)
-        {
-            System.out.println(xPrim[i]);
-        }
-        */
-
+        return ret;
     }
 
     private double[] approxPageRank(int numberOfDocs)
     {
+        generateG(numberOfDocs);
         double[] x = new double[numberOfDocs];
         double[] xPrim = new double[numberOfDocs];
 
+        // Initial guess.
         x[0] = 1;
-
         for(int iters = 0; iters < 1000; iters++)
         {
             for(int i = 0; i < numberOfDocs; i++)
@@ -281,16 +345,18 @@ public class PageRank{
 
     private double[] powerIteration(int numberOfDocs)
     {
+        generateG(numberOfDocs);
         double[] x = new double[numberOfDocs];
         double[] xPrim = new double[numberOfDocs];
 
+        // Initial guess.
         double initValue = 1 / (double) numberOfDocs;
-
         for(int i = 0; i < numberOfDocs; i++)
         {
             xPrim[i] = initValue;
         }
 
+        // Loop until we found a stable distribution.
         int numberOfIter = 0;
         while(calculateDiff(x,xPrim, numberOfDocs) > EPSILON)
         {
@@ -311,7 +377,15 @@ public class PageRank{
             }
 
         }
-        System.out.println("Achieved stable after " + numberOfIter + " iterations.");
+        double total = 0;
+        for(int i = 0; i < numberOfDocs; i++)
+        {
+            total+=xPrim[i];
+        }
+        for(int i = 0; i < numberOfDocs; i++)
+        {
+            xPrim[i] = xPrim[i] / total;
+        }
         return xPrim;
     }
 
