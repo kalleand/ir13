@@ -5,6 +5,7 @@
 *.log
 *.aux
 *.pdf
+svwiki_links/links.txt
 
 # Package Files #
 *.jar
