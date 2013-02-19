@@ -364,7 +364,9 @@ public class MegaIndex implements Index {
                         return result;
                     for(PostingsEntry pe : result.list)
                     {
-                        result.addScore(pe.docID, (Double) pageranks.get(docIDs.get(""+pe.docID))); 
+                        String tmpStr = docIDs.get("" + pe.docID);
+                        tmpStr = tmpStr.substring(tmpStr.lastIndexOf('/') + 1, tmpStr.lastIndexOf('.'));
+                        result.addScore(pe.docID, (Double) pageranks.get(tmpStr)); 
                     }
                 }
                 Collections.sort(result.list);

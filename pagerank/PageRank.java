@@ -191,7 +191,6 @@ public class PageRank{
         }
         Collections.sort(al);
 
-        /*
         // Prints the 50 top scores.
         for(int i = 0; i < 50; i++)
         {
@@ -200,16 +199,9 @@ public class PageRank{
             // (Both are Integers of links1000.txt and links10000.txt)
             System.out.println((i+1) + ".\t" + al.get(i).name + "\t" + al.get(i).val);
         }
-        */
         for(CompareObj co : al)
         {
-            if(Integer.parseInt(co.name) < 1000)
-            {
-                //System.out.println("svwiki/files/1000/"+co.name+".txt");
-                result.put("svwiki/files/1000/"+co.name+".txt", co.val);
-            }
-            else
-                break;
+            result.put(co.name, co.val);
         }
     }
 
@@ -429,15 +421,17 @@ public class PageRank{
         {
             if( obj instanceof CompareObj )
             {
-                int a = Integer.parseInt(this.name);
-                int b = Integer.parseInt(((CompareObj) obj).name);
-                if(a < b)
-                    return -1;
-                if(a > b)
-                    return 1;
-                else
-                    return 0;
-                //return (int) Double.compare(((CompareObj) obj).val, this.val);
+                /*
+                   int a = Integer.parseInt(this.name);
+                   int b = Integer.parseInt(((CompareObj) obj).name);
+                   if(a < b)
+                   return -1;
+                   if(a > b)
+                   return 1;
+                   else
+                   return 0;
+                   */
+                return (int) Double.compare(((CompareObj) obj).val, this.val);
             }
             else
             {
