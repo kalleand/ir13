@@ -105,13 +105,44 @@ public class PostingsList implements Comparable<PostingsList>, Serializable {
         }
     }
 
-    public void union(PostingsList other)
+    public static PostingsList union(PostingsList a, PostingsList b)
     {
-        if(other == null) return;
-        for(PostingsEntry pe : other.list)
+        PostingsList result = new PostingsList();
+        int i = 0;
+        int j = 0;
+
+        while(i < a.size() && j < b.size())
         {
-            add(pe.docID, 0);
+            int ai = a.get(i).docID;
+            int bj = b.get(j).docID;
+            if(ai == bj)
+            {
+                result.list.addLast(new PostingsEntry(ai, 0, 0));
+                i++;
+                j++;
+            }
+            else if(ai < bj)
+            {
+                result.list.addLast(new PostingsEntry(ai, 0, 0));
+                i++;
+            }
+            else
+            {
+                result.list.addLast(new PostingsEntry(bj, 0, 0));
+                j++;
+            }
         }
+        while(i < a.size())
+        {
+            result.list.addLast(new PostingsEntry(a.get(i).docID, 0, 0));
+            i++;
+        }
+        while(j < b.size())
+        {
+            result.list.addLast(new PostingsEntry(b.get(j).docID, 0, 0));
+            j++;
+        }
+        return result;
     }
 
     public static PostingsList intersect_query(PostingsList a, PostingsList b) {

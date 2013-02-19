@@ -45,6 +45,8 @@ public class MegaIndex implements Index {
 
     private static final String pathToLinks = "svwiki_links/links10000.txt";
 
+    private static final double PAGERANK_WEIGHT = 7;
+
     /** Number of documents in the index. */
     private int numberOfDocs = -2;
 
@@ -323,7 +325,8 @@ public class MegaIndex implements Index {
                 PostingsList result = new PostingsList();
                 for( QueryFrequency qf : al )
                 {
-                    result.union((PostingsList) getPostings(qf.term));
+                    result = PostingsList.union(result, (PostingsList) getPostings(qf.term));
+                    //result.union((PostingsList) getPostings(qf.term));
                 }
 
                 if(numberOfDocs < 0)
@@ -366,7 +369,7 @@ public class MegaIndex implements Index {
                     {
                         String tmpStr = docIDs.get("" + pe.docID);
                         tmpStr = tmpStr.substring(tmpStr.lastIndexOf('/') + 1, tmpStr.lastIndexOf('.'));
-                        result.addScore(pe.docID, (Double) pageranks.get(tmpStr)); 
+                        result.addScore(pe.docID, ((Double) pageranks.get(tmpStr)) * PAGERANK_WEIGHT); 
                     }
                 }
                 Collections.sort(result.list);
