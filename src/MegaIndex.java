@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Collections;
 import java.util.Set;
+import java.util.ArrayList;
 
 
 public class MegaIndex implements Index {
@@ -304,10 +305,25 @@ public class MegaIndex implements Index {
             }
             else if(queryType == Index.RANKED_QUERY)
             {
-                PostingsList result = new PostingsList();
-                for( String term : query.terms )
+                ArrayList<QueryFrequency> al = new ArrayList<QueryFrequency>();
+                for(String term : query.terms)
                 {
-                    result.union((PostingsList) getPostings(term));
+                    QueryFrequency tmpQF = new QueryFrequency(term);
+                    if(al.indexOf(tmpQF) == -1)
+                    {
+                        al.add(tmpQF);
+                    }
+                    else
+                    {
+                        QueryFrequency qf = al.get(al.indexOf(tmpQF));
+                        qf.increase();
+                    }
+                }
+
+                PostingsList result = new PostingsList();
+                for( QueryFrequency qf : al )
+                {
+                    result.union((PostingsList) getPostings(qf.term));
                 }
 
                 if(numberOfDocs < 0)
@@ -318,21 +334,21 @@ public class MegaIndex implements Index {
 
                 if(rankingType == Index.TF_IDF || rankingType == Index.COMBINATION)
                 {
-                    for( String term : query.terms )
+                    for( QueryFrequency qf : al )
                     {
-                        PostingsList tmp = (PostingsList) getPostings(term);
+                        PostingsList tmp = (PostingsList) getPostings(qf.term);
                         if(tmp == null) continue;
 
                         double idf = Math.log10( numberOfDocs / tmp.size() );
 
-                        double wtq = Math.log10( 1/* Should be number of occurences in query. */ ) + 1;
+                        double wtq = Math.log10( qf.count ) + 1;
                         wtq*= idf;
                         for ( PostingsEntry pe : tmp.list )
                         {
                             if(pe.offsets.size() != 0)
                             {
-                                result.addScore(pe.docID, (1 + Math.log10(pe.offsets.size())) * idf * wtq);
-                                //result.addScore(pe.docID, pe.offsets.size() * idf);
+                                //result.addScore(pe.docID, (1 + Math.log10(pe.offsets.size())) * idf * wtq);
+                                result.addScore(pe.docID, pe.offsets.size() * idf * wtq);
                             }
                         }
                     }
@@ -362,6 +378,42 @@ public class MegaIndex implements Index {
             System.out.println("MegaMap BROKE while searching!");
             e.printStackTrace();
             return null;
+        }
+    }
+    private class QueryFrequency implements Comparable
+    {
+        public String term;
+        public int count;
+
+        public QueryFrequency(String t)
+        {
+            term = t;
+            count = 1;
+        }
+
+        public void increase()
+        {
+            count++;
+        }
+
+        public int compareTo(Object other)
+        {
+            if(other instanceof QueryFrequency)
+            {
+                return term.compareTo(((QueryFrequency) other).term);
+            }
+            else
+                return -1;
+        }
+
+        public boolean equals(Object other)
+        {
+            if(other instanceof QueryFrequency)
+            {
+                return term.equals(((QueryFrequency) other).term);
+            }
+            else
+                return false;
         }
     }
 }
