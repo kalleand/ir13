@@ -6,6 +6,7 @@
 *.aux
 *.pdf
 svwiki_links/links.txt
+articleTitles.txt
 
 # Package Files #
 *.jar

@@ -110,6 +110,29 @@ public class PostingsList implements Comparable<PostingsList>, Serializable {
         PostingsList result = new PostingsList();
         int i = 0;
         int j = 0;
+        if(a == null && b == null)
+        {
+            return result;
+        }
+        else if(b == null)
+        {
+            i = 0;
+            while(i < a.size())
+            {
+                result.list.addLast(new PostingsEntry(a.get(i).docID, 0, 0));
+                i++;
+            }
+            return result;
+        }
+        else if(a == null)
+        {
+            i = 0;
+            while(i < b.size())
+            {
+                result.list.addLast(new PostingsEntry(b.get(i).docID, 0, 0));
+                i++;
+            }
+        }
 
         while(i < a.size() && j < b.size())
         {
