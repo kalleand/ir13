@@ -191,6 +191,7 @@ public class PageRank{
         }
         Collections.sort(al);
 
+        /*
         // Prints the 50 top scores.
         for(int i = 0; i < 50; i++)
         {
@@ -199,6 +200,7 @@ public class PageRank{
             // (Both are Integers of links1000.txt and links10000.txt)
             System.out.println((i+1) + ".\t" + al.get(i).name + "\t" + al.get(i).val);
         }
+        */
         for(CompareObj co : al)
         {
             result.put(co.name, co.val);
