@@ -25,8 +25,8 @@ drun:
 	java -Xmx1024m -cp .:pdfbox:megamap ir.SearchGUI -d svwiki/files/$(FILES) -m
 
 clean:
-	rm ir/*.class
-	rm index_*
+	rm -f ir/*.class
+	rm -f index_*
 
 move:
 ifdef INDEX
