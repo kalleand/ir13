@@ -99,4 +99,9 @@ public class HashedIndex implements Index {
      */
     public void cleanup() {
     }
+
+    public void addTerm(int docID, String token)
+    {
+        // Not implemented for HashedIndex.
+    }
 }

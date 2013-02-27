@@ -1,22 +1,28 @@
-/*  
+/*
  *   This file is part of the computer assignment for the
  *   Information Retrieval course at KTH.
- * 
+ *
  *   First version:  Hedvig Kjellström, 2012
- */  
+ */
 
 package ir;
 
 import java.util.LinkedList;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.StringTokenizer;
 
 public class Query {
 
+    /* Constants. */
+    public static final double ALPHA = 0.1;
+    public static final double BETA = 1 - ALPHA;
+
     public LinkedList<String> terms = new LinkedList<String>();
-    public LinkedList<Double> weights = new LinkedList<Double>();
+    public HashMap<String, Double> weights = new HashMap<String, Double>();
 
     /**
-     *  Creates a new empty Query 
+     *  Creates a new empty Query
      */
     public Query() {
     }
@@ -27,11 +33,20 @@ public class Query {
     public Query( String queryString  ) {
         StringTokenizer tok = new StringTokenizer( queryString );
         while ( tok.hasMoreTokens() ) {
-            terms.add( tok.nextToken() );
-            weights.add( new Double(1) );
-        }    
+            String token = tok.nextToken();
+            terms.add( token);
+            weights.put( token, new Double(1) );
+        }
+        normalize_query();
     }
 
+    private void normalize_query()
+    {
+        for(String term : terms) 
+        {
+            weights.put(term, weights.get(term) / terms.size());
+        }
+    }
     /**
      *  Returns the number of terms
      */
@@ -45,7 +60,7 @@ public class Query {
     public Query copy() {
         Query queryCopy = new Query();
         queryCopy.terms = (LinkedList<String>) terms.clone();
-        queryCopy.weights = (LinkedList<Double>) weights.clone();
+        queryCopy.weights = (HashMap<String, Double>) weights.clone();
         return queryCopy;
     }
 
@@ -56,8 +71,28 @@ public class Query {
         // results contain the ranked list from the current search
         // docIsRelevant contains the users feedback on which of the 10 first hits are relevant
 
-        //
-        //  YOUR CODE HERE
-        //
+        /* Multiply every original term with ALPHA. */
+        for(String term : terms)
+        {
+            weights.put(term, weights.get(term) * ALPHA);
+        }
+
+        for(int i = 0; i < docIsRelevant.length; i++)
+        {
+            if(docIsRelevant[i] == false) continue;
+            int docID = results.get(i).docID;
+            HashSet<String> docTerms = indexer.index.terms.get(docID);
+            int size = indexer.index.docLengths.get(""+docID);
+            for(String term : docTerms)
+            {
+                // GET THE TF
+                //
+                // DIVIDE BY DOCLENGTH (SIZE)
+                //
+                // ADD IT TO THE QUERY
+                //      IF IT EXISTS ADD THE SCORE
+            }
+        }
+
     }
 }

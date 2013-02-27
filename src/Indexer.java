@@ -128,7 +128,9 @@ public class Indexer {
                     SimpleTokenizer tok = new SimpleTokenizer( reader );
                     int offset = 0;
                     while ( tok.hasMoreTokens() ) {
-                        insertIntoIndex( docID, tok.nextToken(), offset++ );
+                        String token = tok.nextToken();
+                        insertIntoIndex( docID, token, offset++ );
+                        insertToTerms(docID, token);
                     }
                     index.docLengths.put( "" + docID, offset );
                     reader.close();
@@ -168,6 +170,14 @@ public class Indexer {
      */
     public void insertIntoIndex( int docID, String token, int offset ) {
         index.insert( token, docID, offset );
+    }
+
+    /**
+     * Add terms in document.
+     */
+    public void insertToTerms(int docID, String token)
+    {
+        index.addTerm(docID, token);
     }
 }
 

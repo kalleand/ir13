@@ -1,11 +1,11 @@
-/*  
+/*
  *   This file is part of the computer assignment for the
  *   Information Retrieval course at KTH.
- * 
+ *
  *   First version:  Johan Boye, 2010
  *   Second version: Johan Boye, 2012
  *   Additions: Hedvig Kjellström, 2012
- */  
+ */
 
 package ir;
 
@@ -26,14 +26,14 @@ import java.util.ArrayList;
 
 public class MegaIndex implements Index {
 
-    /** 
-     *  The index as a hash map that can also extend to secondary 
-     *	memory if necessary. 
+    /**
+     *  The index as a hash map that can also extend to secondary
+     *	memory if necessary.
      */
     private MegaMap index;
 
 
-    /** 
+    /**
      *  The MegaMapManager is the user's entry point for creating and
      *  saving MegaMaps on disk.
      */
@@ -51,6 +51,7 @@ public class MegaIndex implements Index {
     private int numberOfDocs = -2;
 
     private HashMap<String, Double> pageranks = new HashMap<String, Double>();
+
 
     /**
      *  Create a new index and invent a name for it.
@@ -146,7 +147,7 @@ public class MegaIndex implements Index {
 
 
     /**
-     *   It is ABSOLUTELY ESSENTIAL to run this method before terminating 
+     *   It is ABSOLUTELY ESSENTIAL to run this method before terminating
      *   the JVM, otherwise the index files might become corrupted.
      */
     public void cleanup() {
@@ -215,7 +216,7 @@ public class MegaIndex implements Index {
                         res.put(token, pl);
                     } else {
                         PostingsList pl = (PostingsList) res.get(token);
-                        pl.merge_pl( (PostingsList) map.get(token) ); 
+                        pl.merge_pl( (PostingsList) map.get(token) );
                     }
                 }
             }
@@ -235,7 +236,7 @@ public class MegaIndex implements Index {
         try {
             current_list = (PostingsList)index.get(token);
         } catch (MegaMapException e) {
-            System.out.println("MegaMap BROKE!"); 
+            System.out.println("MegaMap BROKE!");
         }
         // If the token does not exist yet - create a new postingslist for it
         if(current_list == null) {
@@ -288,7 +289,7 @@ public class MegaIndex implements Index {
                     PostingsList result = queue.pollFirst();
                     while(queue.size() != 0) {
                         result = PostingsList.intersect_query(result, queue.pollFirst());
-                    } 
+                    }
                     return result;
                 }
             } else if(queryType == Index.PHRASE_QUERY) {
@@ -307,6 +308,7 @@ public class MegaIndex implements Index {
             }
             else if(queryType == Index.RANKED_QUERY)
             {
+                /*
                 ArrayList<QueryFrequency> al = new ArrayList<QueryFrequency>();
                 for(String term : query.terms)
                 {
@@ -321,12 +323,12 @@ public class MegaIndex implements Index {
                         qf.increase();
                     }
                 }
+                */
 
                 PostingsList result = new PostingsList();
-                for( QueryFrequency qf : al )
+                for( String term : query.terms )
                 {
-                    result = PostingsList.union(result, (PostingsList) getPostings(qf.term));
-                    //result.union((PostingsList) getPostings(qf.term));
+                    result = PostingsList.union(result, (PostingsList) getPostings(term));
                 }
 
                 if(numberOfDocs < 0)
@@ -334,23 +336,23 @@ public class MegaIndex implements Index {
                     numberOfDocs = docLengths.keySet().size();
                 }
 
-
                 if(rankingType == Index.TF_IDF || rankingType == Index.COMBINATION)
                 {
-                    for( QueryFrequency qf : al )
+                    for( String term : query.terms )
                     {
-                        PostingsList tmp = (PostingsList) getPostings(qf.term);
+                        PostingsList tmp = (PostingsList) getPostings(term);
                         if(tmp == null) continue;
 
                         double idf = Math.log10( numberOfDocs / tmp.size() );
 
-                        double wtq = Math.log10( qf.count ) + 1;
-                        wtq*= idf;
+                        double wtq = query.weights.get(term);
+                        wtq *= idf;
                         for ( PostingsEntry pe : tmp.list )
                         {
                             if(pe.offsets.size() != 0)
                             {
-                                //result.addScore(pe.docID, (1 + Math.log10(pe.offsets.size())) * idf * wtq);
+                                //result.addScore(pe.docID, (1 + Math.log10(pe.offsets.size()))
+                                //* idf * wtq);
                                 result.addScore(pe.docID, pe.offsets.size() * idf * wtq);
                             }
                         }
@@ -368,8 +370,10 @@ public class MegaIndex implements Index {
                     for(PostingsEntry pe : result.list)
                     {
                         String tmpStr = docIDs.get("" + pe.docID);
-                        tmpStr = tmpStr.substring(tmpStr.lastIndexOf('/') + 1, tmpStr.lastIndexOf('.'));
-                        result.addScore(pe.docID, ((Double) pageranks.get(tmpStr)) * PAGERANK_WEIGHT); 
+                        tmpStr = tmpStr.substring(tmpStr.lastIndexOf('/') + 1,
+                                tmpStr.lastIndexOf('.'));
+                        result.addScore(pe.docID, ((Double) pageranks.get(tmpStr))
+                                * PAGERANK_WEIGHT);
                     }
                 }
                 Collections.sort(result.list);
@@ -377,7 +381,7 @@ public class MegaIndex implements Index {
             }
             else
             {
-                return null;
+                return new PostingsList();
             }
         } catch (MegaMapException e) {
             System.out.println("MegaMap BROKE while searching!");
@@ -385,6 +389,19 @@ public class MegaIndex implements Index {
             return null;
         }
     }
+
+    public void addTerm(int docID, String token)
+    {
+        HashSet<String> tmp = terms.get(docID);
+        if(tmp == null)
+        {
+            tmp = new HashSet<String>();
+            terms.put(docID, tmp);
+        }
+        tmp.add(token);
+    }
+
+/*
     private class QueryFrequency implements Comparable
     {
         public String term;
@@ -421,4 +438,5 @@ public class MegaIndex implements Index {
                 return false;
         }
     }
+*/
 }

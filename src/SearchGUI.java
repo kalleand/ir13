@@ -95,9 +95,9 @@ public class SearchGUI extends JFrame {
     ButtonGroup queries = new ButtonGroup();
     ButtonGroup ranking = new ButtonGroup(); 
     public JPanel feedbackBar = new JPanel(); 
-    JCheckBox[] feedbackButton = { new JCheckBox ( "1" ), new JCheckBox ( "2" ), new JCheckBox ( "3" ), 
+    JCheckBox[] feedbackButton = { new JCheckBox ( "0" ), new JCheckBox ( "1" ), new JCheckBox ( "2" ), new JCheckBox ( "3" ), 
         new JCheckBox ( "4" ), new JCheckBox ( "5" ), new JCheckBox ( "6" ), new JCheckBox ( "7" ), 
-        new JCheckBox ( "8" ), new JCheckBox ( "9" ), new JCheckBox ( "10" ) }; 
+        new JCheckBox ( "8" ), new JCheckBox ( "9" )}; 
     JToggleButton feedbackExecutor = new JToggleButton("New search"); 
 
 
