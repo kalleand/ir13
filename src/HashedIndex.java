@@ -100,6 +100,11 @@ public class HashedIndex implements Index {
     public void cleanup() {
     }
 
+    public int getNumberOfDocs()
+    {
+        // Not implemented for HashedIndex.
+        return 0;
+    }
     public void addTerm(int docID, String token)
     {
         // Not implemented for HashedIndex.

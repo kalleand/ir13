@@ -86,18 +86,21 @@ public class Query {
 
         for(int i = 0; i < docIsRelevant.length; i++)
         {
-            if(!docIsRelevant[i])
-                continue;
-            else
+            if(docIsRelevant[i])
             {
                 int docID = results.get(i).docID;
                 HashSet<String> docTerms = indexer.index.terms.get(docID);
                 int size = indexer.index.docLengths.get(""+docID);
                 for(String term : docTerms)
                 {
+                    PostingsList pl = indexer.index.getPostings(term);
+                    double numberOfDocs = indexer.index.getNumberOfDocs();
+                    if(numberOfDocs / MegaIndex.IE_THRESHOLD < pl.size()) 
+                    {
+                        continue;
+                    }
                     // GET THE TF
                     double tf = 0;
-                    PostingsList pl = indexer.index.getPostings(term);
                     for( PostingsEntry pe : pl.list)
                     {
                         if(pe.docID == docID)
@@ -106,8 +109,9 @@ public class Query {
                             break;
                         }
                     }
-                    tf = tf / size;
+                    tf = tf / size; // Normalize
 
+                    // ROCCHIO
                     double termScore = tf * BETA * relevantDocsConstant;
                     if(!terms.contains(term))
                     {

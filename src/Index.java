@@ -27,7 +27,9 @@ public interface Index {
     /* Ranking types */
     public static final int TF_IDF = 0; 
     public static final int PAGERANK = 1; 
-    public static final int COMBINATION = 2; 
+    public static final int COMBINATION = 2;
+
+    public static final double IE_THRESHOLD = 4;
 
     public HashMap<String, String> docIDs = new HashMap<String,String>();
     public HashMap<String,Integer> docLengths = new HashMap<String,Integer>();
@@ -37,5 +39,6 @@ public interface Index {
     public PostingsList getPostings( String token );
     public PostingsList search( Query query, int queryType, int rankingType );
     public void cleanup();
+    public int getNumberOfDocs();
     public void addTerm(int docID, String token);
 }

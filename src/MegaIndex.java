@@ -47,11 +47,9 @@ public class MegaIndex implements Index {
 
     private static final double PAGERANK_WEIGHT = 7;
 
-    /** Number of documents in the index. */
-    private int numberOfDocs = -2;
-
     private HashMap<String, Double> pageranks = new HashMap<String, Double>();
 
+    public int numberOfDocs = -2;
 
     /**
      *  Create a new index and invent a name for it.
@@ -308,32 +306,20 @@ public class MegaIndex implements Index {
             }
             else if(queryType == Index.RANKED_QUERY)
             {
-                /*
-                ArrayList<QueryFrequency> al = new ArrayList<QueryFrequency>();
-                for(String term : query.terms)
+                long startTime = System.nanoTime();
+                if(numberOfDocs < 0)
                 {
-                    QueryFrequency tmpQF = new QueryFrequency(term);
-                    if(al.indexOf(tmpQF) == -1)
-                    {
-                        al.add(tmpQF);
-                    }
-                    else
-                    {
-                        QueryFrequency qf = al.get(al.indexOf(tmpQF));
-                        qf.increase();
-                    }
+                    numberOfDocs = docLengths.keySet().size();
                 }
-                */
 
                 PostingsList result = new PostingsList();
                 for( String term : query.terms )
                 {
-                    result = PostingsList.union(result, (PostingsList) getPostings(term));
-                }
-
-                if(numberOfDocs < 0)
-                {
-                    numberOfDocs = docLengths.keySet().size();
+                    PostingsList pl = getPostings(term);
+                    if( (double) numberOfDocs / IE_THRESHOLD > pl.size())
+                    {
+                        result = PostingsList.union(result, pl);
+                    }
                 }
 
                 if(rankingType == Index.TF_IDF || rankingType == Index.COMBINATION)
@@ -345,8 +331,7 @@ public class MegaIndex implements Index {
 
                         double idf = Math.log10( numberOfDocs / tmp.size() );
 
-                        double wtq = query.weights.get(term);
-                        wtq *= idf;
+                        double wtq = query.weights.get(term) * idf;
                         for ( PostingsEntry pe : tmp.list )
                         {
                             if(pe.offsets.size() != 0)
@@ -377,6 +362,7 @@ public class MegaIndex implements Index {
                     }
                 }
                 Collections.sort(result.list);
+                System.out.println("This query took " + (System.nanoTime() - startTime));
                 return result;
             }
             else
@@ -390,6 +376,10 @@ public class MegaIndex implements Index {
         }
     }
 
+    public int getNumberOfDocs()
+    {
+        return numberOfDocs;
+    }
     public void addTerm(int docID, String token)
     {
         HashSet<String> tmp = terms.get(docID);
@@ -400,43 +390,4 @@ public class MegaIndex implements Index {
         }
         tmp.add(token);
     }
-
-/*
-    private class QueryFrequency implements Comparable
-    {
-        public String term;
-        public int count;
-
-        public QueryFrequency(String t)
-        {
-            term = t;
-            count = 1;
-        }
-
-        public void increase()
-        {
-            count++;
-        }
-
-        public int compareTo(Object other)
-        {
-            if(other instanceof QueryFrequency)
-            {
-                return term.compareTo(((QueryFrequency) other).term);
-            }
-            else
-                return -1;
-        }
-
-        public boolean equals(Object other)
-        {
-            if(other instanceof QueryFrequency)
-            {
-                return term.equals(((QueryFrequency) other).term);
-            }
-            else
-                return false;
-        }
-    }
-*/
 }
