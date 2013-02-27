@@ -16,7 +16,7 @@ public class Query {
 
     /* Constants. */
     public static final double ALPHA = 0.1;
-    public static final double BETA = 1 - ALPHA;
+    public static final double BETA = (1 - ALPHA);
 
     public LinkedList<String> terms = new LinkedList<String>();
     public HashMap<String, Double> weights = new HashMap<String, Double>();
@@ -77,22 +77,49 @@ public class Query {
             weights.put(term, weights.get(term) * ALPHA);
         }
 
+        double numberOfRelevantDocs = 0;
         for(int i = 0; i < docIsRelevant.length; i++)
         {
-            if(docIsRelevant[i] == false) continue;
-            int docID = results.get(i).docID;
-            HashSet<String> docTerms = indexer.index.terms.get(docID);
-            int size = indexer.index.docLengths.get(""+docID);
-            for(String term : docTerms)
+            if(docIsRelevant[i]) numberOfRelevantDocs++;
+        }
+        double relevantDocsConstant = 1 / numberOfRelevantDocs;
+
+        for(int i = 0; i < docIsRelevant.length; i++)
+        {
+            if(!docIsRelevant[i])
+                continue;
+            else
             {
-                // GET THE TF
-                //
-                // DIVIDE BY DOCLENGTH (SIZE)
-                //
-                // ADD IT TO THE QUERY
-                //      IF IT EXISTS ADD THE SCORE
+                int docID = results.get(i).docID;
+                HashSet<String> docTerms = indexer.index.terms.get(docID);
+                int size = indexer.index.docLengths.get(""+docID);
+                for(String term : docTerms)
+                {
+                    // GET THE TF
+                    double tf = 0;
+                    PostingsList pl = indexer.index.getPostings(term);
+                    for( PostingsEntry pe : pl.list)
+                    {
+                        if(pe.docID == docID)
+                        {
+                            tf = pe.offsets.size();
+                            break;
+                        }
+                    }
+                    tf = tf / size;
+
+                    double termScore = tf * BETA * relevantDocsConstant;
+                    if(!terms.contains(term))
+                    {
+                        terms.addLast(term);
+                        weights.put(term, termScore);
+                    }
+                    else
+                    {
+                        weights.put(term, weights.get(term) + termScore);
+                    }
+                }
             }
         }
-
     }
 }

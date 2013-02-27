@@ -5,7 +5,7 @@ ifndef FILES
 FILES=1000
 endif
 ifndef MODE
-MODE=i
+MODE=d
 endif
 
 build:
