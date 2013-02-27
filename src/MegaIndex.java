@@ -313,12 +313,19 @@ public class MegaIndex implements Index {
                 }
 
                 PostingsList result = new PostingsList();
-                for( String term : query.terms )
+                int i = 0;
+                while(i < query.terms.size())
                 {
+                    String term = query.terms.get(i);
                     PostingsList pl = getPostings(term);
-                    if( (double) numberOfDocs / IE_THRESHOLD > pl.size())
+                    if(pl != null && (double) numberOfDocs / IE_THRESHOLD > pl.size())
                     {
                         result = PostingsList.union(result, pl);
+                        i++;
+                    }
+                    else
+                    {
+                        query.terms.remove(i);
                     }
                 }
 
@@ -344,8 +351,8 @@ public class MegaIndex implements Index {
                     }
                     for ( PostingsEntry pe : result.list )
                     {
-                        int i = docLengths.get(""+ pe.docID);
-                        pe.score /= i;
+                        int length = docLengths.get(""+ pe.docID);
+                        pe.score /= length;
                     }
                 }
                 if(rankingType == Index.PAGERANK || rankingType == Index.COMBINATION)
