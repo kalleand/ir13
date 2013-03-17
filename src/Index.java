@@ -18,6 +18,7 @@ public interface Index {
     /* Index types */
     public static final int HASHED_INDEX = 0;
     public static final int MEGA_INDEX = 1;
+    public static final int BIWORD_INDEX = 2;
 
     /* Query types */
     public static final int INTERSECTION_QUERY = 0;

@@ -56,8 +56,11 @@ public class Indexer {
     /**
      *  Initializes the index as a HashedIndex.
      */
-    public Indexer() {
-        index = new HashedIndex();
+    public Indexer(int type) {
+        if(type == Index.HASHED_INDEX)
+            index = new HashedIndex();
+        else if(type == Index.BIWORD_INDEX)
+            index = new BiwordIndex();
     }
 
     /** 
@@ -90,7 +93,7 @@ public class Indexer {
                 System.err.println( "Indexing " + f.getPath() );
                 // First register the document and get a docID
                 int docID;
-                if ( index instanceof HashedIndex ) {
+                if ( index instanceof HashedIndex  || index instanceof BiwordIndex) {
                     // For HashedIndex, use integers.
                     docID = generateDocID();
                 }

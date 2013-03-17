@@ -1,4 +1,4 @@
-.PHONY: build, run, irun, drun, clean, move, buildPagerank, runPagerank
+.PHONY: build, run, irun, drun, clean, brun, move, buildPagerank, runPagerank
 default: build
 
 ifndef FILES
@@ -27,6 +27,9 @@ drun:
 clean:
 	rm -f ir/*.class
 	rm -f index_*
+
+brun: build
+	java -Xmx1024m -cp .:pdfbox:megamap ir.SearchGUI -d svwiki/files/$(FILES) -b
 
 move:
 ifdef INDEX

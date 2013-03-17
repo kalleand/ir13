@@ -1,10 +1,10 @@
-/*  
+/*
  *   This file is part of the computer assignment for the
  *   Information Retrieval course at KTH.
- * 
+ *
  *   First version: Johan Boye, 2012
  *   Additions: Hedvig Kjellström, 2012
- */  
+ */
 
 
 package ir;
@@ -30,10 +30,10 @@ public class SearchGUI extends JFrame {
     Indexer indexer;
 
     /**  The query posed by the user, used in search() and relevanceFeedbackSearch() */
-    private Query query; 
+    private Query query;
 
     /**  The returned documents, used in search() and relevanceFeedbackSearch() */
-    private PostingsList results; 
+    private PostingsList results;
 
     /**  Directories that should be indexed. */
     LinkedList<String> dirNames = new LinkedList<String>();
@@ -72,7 +72,7 @@ public class SearchGUI extends JFrame {
     static final String BLANKPIC = homeDir + "/pics/blank.jpg";
 
 
-    /*  
+    /*
      *   Common GUI resources
      */
     public JTextField queryWindow = new JTextField( "", 28 );
@@ -83,7 +83,7 @@ public class SearchGUI extends JFrame {
     JMenuBar menuBar = new JMenuBar();
     JMenu fileMenu = new JMenu( "File" );
     JMenu optionsMenu = new JMenu( "Search options" );
-    JMenu rankingMenu = new JMenu( "Ranking score" ); 
+    JMenu rankingMenu = new JMenu( "Ranking score" );
     JMenuItem saveItem = new JMenuItem( "Save index and exit" );
     JMenuItem quitItem = new JMenuItem( "Quit" );
     JRadioButtonMenuItem intersectionItem = new JRadioButtonMenuItem( "Intersection query" );
@@ -93,12 +93,12 @@ public class SearchGUI extends JFrame {
     JRadioButtonMenuItem pagerankItem = new JRadioButtonMenuItem( "PageRank" );
     JRadioButtonMenuItem combinationItem = new JRadioButtonMenuItem( "Combination" );
     ButtonGroup queries = new ButtonGroup();
-    ButtonGroup ranking = new ButtonGroup(); 
-    public JPanel feedbackBar = new JPanel(); 
-    JCheckBox[] feedbackButton = { new JCheckBox ( "0" ), new JCheckBox ( "1" ), new JCheckBox ( "2" ), new JCheckBox ( "3" ), 
-        new JCheckBox ( "4" ), new JCheckBox ( "5" ), new JCheckBox ( "6" ), new JCheckBox ( "7" ), 
-        new JCheckBox ( "8" ), new JCheckBox ( "9" )}; 
-    JToggleButton feedbackExecutor = new JToggleButton("New search"); 
+    ButtonGroup ranking = new ButtonGroup();
+    public JPanel feedbackBar = new JPanel();
+    JCheckBox[] feedbackButton = { new JCheckBox ( "0" ), new JCheckBox ( "1" ), new JCheckBox ( "2" ), new JCheckBox ( "3" ),
+        new JCheckBox ( "4" ), new JCheckBox ( "5" ), new JCheckBox ( "6" ), new JCheckBox ( "7" ),
+        new JCheckBox ( "8" ), new JCheckBox ( "9" )};
+    JToggleButton feedbackExecutor = new JToggleButton("New search");
 
 
     /* ----------------------------------------------- */
@@ -123,22 +123,22 @@ public class SearchGUI extends JFrame {
         optionsMenu.add( intersectionItem );
         optionsMenu.add( phraseItem );
         optionsMenu.add( rankedItem );
-        rankingMenu.add( tfidfItem ); 
-        rankingMenu.add( pagerankItem ); 
-        rankingMenu.add( combinationItem ); 
+        rankingMenu.add( tfidfItem );
+        rankingMenu.add( pagerankItem );
+        rankingMenu.add( combinationItem );
         queries.add( intersectionItem );
         queries.add( phraseItem );
         queries.add( rankedItem );
-        ranking.add( tfidfItem ); 
+        ranking.add( tfidfItem );
         ranking.add( pagerankItem );
-        ranking.add( combinationItem ); 
+        ranking.add( combinationItem );
         intersectionItem.setSelected( true );
         tfidfItem.setSelected( true );
         p.add( menuBar );
         // Logo
         JPanel p1 = new JPanel();
         p1.setLayout(new BoxLayout(p1, BoxLayout.X_AXIS));
-        p1.add( new JLabel( new ImageIcon( IPIC ))); 
+        p1.add( new JLabel( new ImageIcon( IPIC )));
         p1.add( new JLabel( new ImageIcon( RPIC )));
         p1.add( new JLabel( new ImageIcon( BLANKPIC )));
         p1.add( new JLabel( new ImageIcon( TPIC )));
@@ -163,10 +163,10 @@ public class SearchGUI extends JFrame {
         resultWindow.setFont( resultFont );
         // Relevance feedback
         for ( int i = 0; i<10; i++ ) {
-            feedbackBar.add( feedbackButton[i] ); 
+            feedbackBar.add( feedbackButton[i] );
         }
         feedbackBar.add( feedbackExecutor );
-        p.add( feedbackBar ); 
+        p.add( feedbackBar );
         // Show the interface
         setVisible( true );
 
@@ -179,7 +179,7 @@ public class SearchGUI extends JFrame {
                 // we don't want to search at the same time we're indexing new files
                 // (this might corrupt the index).
                 synchronized ( indexLock ) {
-                    results = indexer.index.search( query, queryType, rankingType ); 
+                    results = indexer.index.search( query, queryType, rankingType );
                 }
                 StringBuffer buf = new StringBuffer();
                 if ( results != null ) {
@@ -194,7 +194,7 @@ public class SearchGUI extends JFrame {
                             buf.append( filename );
                         }
                         if ( queryType == Index.RANKED_QUERY ) {
-                            buf.append( "   " + String.format( "%.5f", results.get(i).score )); 
+                            buf.append( "   " + String.format( "%.5f", results.get(i).score ));
                         }
                         buf.append( "\n" );
                     }
@@ -211,20 +211,20 @@ public class SearchGUI extends JFrame {
                 KeyStroke.getKeyStroke( "ENTER" ),
                 JComponent.WHEN_FOCUSED );
 
-        Action relevanceFeedbackSearch = new AbstractAction() { 
+        Action relevanceFeedbackSearch = new AbstractAction() {
             public void actionPerformed( ActionEvent e ) {
                 // Check that a ranked search has been made prior to the relevance feedback
                 StringBuffer buf = new StringBuffer();
                 if (( results != null ) && ( queryType == Index.RANKED_QUERY )) {
                     // Read user relevance feedback selections
-                    boolean[] docIsRelevant = { false, false, false, false, false, false, false, false, false, false }; 
+                    boolean[] docIsRelevant = { false, false, false, false, false, false, false, false, false, false };
                     for ( int i = 0; i<10; i++ ) {
-                        docIsRelevant[i] = feedbackButton[i].isSelected(); 
+                        docIsRelevant[i] = feedbackButton[i].isSelected();
                     }
-                    // Expand the current search query with the documents marked as relevant 
+                    // Expand the current search query with the documents marked as relevant
                     query.relevanceFeedback( results, docIsRelevant, indexer );
 
-                    // Perform a new search with the weighted and expanded query. Access to the index is 
+                    // Perform a new search with the weighted and expanded query. Access to the index is
                     // synchronized since we don't want to search at the same time we're indexing new files
                     // (this might corrupt the index).
                     synchronized ( indexLock ) {
@@ -251,7 +251,7 @@ public class SearchGUI extends JFrame {
                 resultWindow.setCaretPosition( 0 );
             }
         };
-        feedbackExecutor.addActionListener( relevanceFeedbackSearch ); 	
+        feedbackExecutor.addActionListener( relevanceFeedbackSearch );
 
         Action saveAndQuit = new AbstractAction() {
             public void actionPerformed( ActionEvent e ) {
@@ -321,8 +321,8 @@ public class SearchGUI extends JFrame {
 
     /**
      *   Calls the indexer to index the chosen directory structure.
-     *   Access to the index is synchronized since we don't want to 
-     *   search at the same time we're indexing new files (this might 
+     *   Access to the index is synchronized since we don't want to
+     *   search at the same time we're indexing new files (this might
      *   corrupt the index).
      */
     private void index() {
@@ -355,7 +355,7 @@ public class SearchGUI extends JFrame {
                 if ( i < args.length ) {
                     indexFiles.add( args[i++] );
                 }
-            } 
+            }
             else if ( "-d".equals( args[i] )) {
                 i++;
                 if ( i < args.length ) {
@@ -366,6 +366,11 @@ public class SearchGUI extends JFrame {
                 i++;
                 indexType = Index.MEGA_INDEX;
             }
+            else if("-b".equals(args[i]))
+            {
+                i++;
+                indexType = Index.BIWORD_INDEX;
+            }
             else {
                 System.err.println( "Unknown option: " + args[i] );
                 break;
@@ -375,8 +380,9 @@ public class SearchGUI extends JFrame {
         //  should be carried out (it would result in a NullPointerException).
         //  Therefore the access to the index must be synchronized.
         synchronized ( indexLock ) {
-            if ( indexType == Index.HASHED_INDEX ) {
-                indexer = new Indexer();
+            if ( indexType == Index.HASHED_INDEX || indexType == Index.BIWORD_INDEX) {
+                resultWindow.setText("Hej Christian!");
+                indexer = new Indexer(indexType);
             }
             else {
                 resultWindow.setText( "\n  Creating MegaIndex, please wait... " );
@@ -384,7 +390,7 @@ public class SearchGUI extends JFrame {
                 resultWindow.setText( "\n  Done!" );
             }
         }
-    }				    
+    }
 
 
     /* ----------------------------------------------- */
