@@ -9,6 +9,7 @@ public class BiwordIndex implements Index
     private int current_docID = Integer.MIN_VALUE;
     private String last_term = null;
 
+    private static final double PAGERANK_WEIGHT = 7;
     private static final String pathToLinks = "svwiki_links/links10000.txt";
     private HashMap<String, Double> pageranks = new HashMap<String, Double>();
     public int numberOfDocs = -2;
@@ -49,16 +50,20 @@ public class BiwordIndex implements Index
 
     public PostingsList search(Query query, int queryType, int rankingType)
     {
+        if(numberOfDocs < 0)
+        {
+            numberOfDocs = docLengths.keySet().size();
+        }
         if(index == null)
             return null;
+        if(query.terms.size() < 2)
+        {
+            return null;
+        }
         if(queryType == Index.INTERSECTION_QUERY)
         {
             // If we have less than 2 words there are 
             // no biword to be constructed.
-            if(query.terms.size() < 2)
-            {
-                return null;
-            }
             String old_term = null;
             PostingsList result = null;;
             for(String term : query.terms)
@@ -70,8 +75,9 @@ public class BiwordIndex implements Index
                 else
                 {
                     String tmp = create_biword(old_term, term);
+                    old_term = term;
                     PostingsList pl = getPostings(tmp);
-                    if(tmp == null)
+                    if(pl == null)
                     {
                         System.out.println("Could not find biword.");
                         return null;
@@ -82,6 +88,79 @@ public class BiwordIndex implements Index
                         result = PostingsList.intersect_query(result, getPostings(tmp));
                 }
             }
+            return result;
+        }
+        else if(queryType == Index.RANKED_QUERY)
+        {    
+            long startTime = System.nanoTime();
+
+            ArrayList<String> terms = new ArrayList<String>();
+            PostingsList result = null;
+            String old_term = null;
+            for(String term : query.terms)
+            {
+                if(old_term == null)
+                    old_term = term;
+                else
+                {
+                    String biword = create_biword(old_term, term);
+                    PostingsList pl = getPostings(biword);
+                    old_term = term;
+
+                    if(pl == null)
+                    {
+                        continue;
+                    }
+                    terms.add(biword);
+
+                    if(result == null)
+                        result = pl;
+                    else
+                        result = PostingsList.union(result, pl);
+                }
+            }
+            if(result == null) return null;
+            if(rankingType == Index.TF_IDF || rankingType == Index.COMBINATION)
+            {
+                for(String term : terms)
+                {
+                    PostingsList tmp = (PostingsList) getPostings(term);
+                    if(tmp == null) continue;
+
+                    double idf = Math.log10( numberOfDocs / tmp.size() );
+
+                    double wtq = (1.0 / (double) terms.size()) * idf;
+                    for ( PostingsEntry pe : tmp.list )
+                    {
+                        if(pe.offsets.size() != 0)
+                        {
+                            //result.addScore(pe.docID, (1 + Math.log10(pe.offsets.size()))
+                            //* idf * wtq);
+                            result.addScore(pe.docID, pe.offsets.size() * idf * wtq);
+                        }
+                    }
+                }
+                for ( PostingsEntry pe : result.list )
+                {
+                    int length = docLengths.get(""+ pe.docID);
+                    pe.score /= length;
+                }
+            }
+            if(rankingType == Index.PAGERANK || rankingType == Index.COMBINATION)
+            {
+                if(pageranks == null)
+                    return result;
+                for(PostingsEntry pe : result.list)
+                {
+                    String tmpStr = docIDs.get("" + pe.docID);
+                    tmpStr = tmpStr.substring(tmpStr.lastIndexOf('/') + 1,
+                            tmpStr.lastIndexOf('.'));
+                    result.addScore(pe.docID, ((Double) pageranks.get(tmpStr))
+                            * PAGERANK_WEIGHT);
+                }
+            }
+            Collections.sort(result.list);
+            System.out.println("This query took " + (System.nanoTime() - startTime));
             return result;
         }
         return null;
@@ -121,16 +200,6 @@ public class BiwordIndex implements Index
         if(a == null || b == null)
             return null;
         else
-            return a + "+" + b;
-    }
-
-    private String get_first(String term)
-    {
-        return term.substring(0, term.indexOf('+'));
-    }
-
-    private String get_second(String term)
-    {
-        return term.substring(term.indexOf('+') + 1);
+            return "{" + a + "+" + b + "}";
     }
 }
