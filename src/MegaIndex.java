@@ -269,48 +269,57 @@ public class MegaIndex implements Index {
             return null;
         }
         try {
+            if(numberOfDocs < 0)
+            {
+                numberOfDocs = docLengths.keySet().size();
+            }
             if(queryType == Index.INTERSECTION_QUERY)
             {
-                if( query.size() == 1) {
-                    return (PostingsList)index.get(query.terms.getFirst());
-                } else {
-                    LinkedList<PostingsList> queue = new LinkedList<PostingsList>();
-                    for( String str : query.terms ) {
-                        PostingsList tmp = (PostingsList)index.get(str);
-                        if(tmp == null)
-                            return new PostingsList();
-                        else
+                LinkedList<PostingsList> queue = new LinkedList<PostingsList>();
+                for( String str : query.terms ) {
+                    PostingsList tmp = (PostingsList)index.get(str);
+                    if(tmp == null)
+                        return null; 
+                    else
+                    {
+                        if((double) numberOfDocs / IE_THRESHOLD > tmp.size() || !Index.SPEED_UP)
                             queue.add(tmp);
                     }
-                    Collections.sort(queue);
+                }
+                Collections.sort(queue);
 
-                    PostingsList result = queue.pollFirst();
-                    while(queue.size() != 0) {
-                        result = PostingsList.intersect_query(result, queue.pollFirst());
-                    }
-                    return result;
+                PostingsList result = queue.pollFirst();
+                while(queue.size() != 0) {
+                    result = PostingsList.intersect_query(result, queue.pollFirst());
                 }
+                return result;
             } else if(queryType == Index.PHRASE_QUERY) {
-                if(query.size() == 1) {
-                    return (PostingsList)index.get(query.terms.getFirst());
-                } else {
-                    PostingsList result = (PostingsList)index.get(query.terms.pollFirst());
-                    while(query.size() != 0) {
-                        PostingsList tmp = (PostingsList)index.get(query.terms.pollFirst());
-                        if(tmp == null)
-                            return null;
-                        result = PostingsList.phrase_query(result, tmp);
+                PostingsList result = new PostingsList();
+                while(query.size() != 0)
+                {
+                    PostingsList tmp = (PostingsList)index.get(query.terms.pollFirst());
+                    if(tmp != null && ((double) numberOfDocs / IE_THRESHOLD > tmp.size() || !Index.SPEED_UP))
+                    {
+                        result = tmp;
+                        break;
                     }
-                    return result;
+                    else
+                        continue;
                 }
+                while(query.size() != 0) {
+                    PostingsList tmp = (PostingsList)index.get(query.terms.pollFirst());
+                    if(tmp == null)
+                        return null;
+                    else if((double) numberOfDocs / IE_THRESHOLD > tmp.size() || !Index.SPEED_UP)
+                        result = PostingsList.phrase_query(result, tmp);
+                    else
+                        result = PostingsList.add_wildcard(result);
+                }
+                return result;
             }
             else if(queryType == Index.RANKED_QUERY)
             {
                 long startTime = System.nanoTime();
-                if(numberOfDocs < 0)
-                {
-                    numberOfDocs = docLengths.keySet().size();
-                }
 
                 PostingsList result = new PostingsList();
                 int i = 0;
@@ -318,7 +327,7 @@ public class MegaIndex implements Index {
                 {
                     String term = query.terms.get(i);
                     PostingsList pl = getPostings(term);
-                    if(pl != null && (double) numberOfDocs / IE_THRESHOLD > pl.size() || !Index.SPEED_UP)
+                    if(pl != null && ((double) numberOfDocs / IE_THRESHOLD > pl.size() || !Index.SPEED_UP))
                     {
                         result = PostingsList.union(result, pl);
                         i++;

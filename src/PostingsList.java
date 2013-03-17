@@ -215,6 +215,22 @@ public class PostingsList implements Comparable<PostingsList>, Serializable {
         return result;
     }
 
+    public static PostingsList add_wildcard(PostingsList a)
+    {
+        PostingsList result = new PostingsList();
+        int i = 0;
+        
+        while(i < a.size())
+        {
+            for(int off : a.get(i).offsets)
+            {
+                result.add(a.get(i).docID, off + 1);
+            }
+            i++;
+        }
+        return result;
+    }
+
     public void addScore(int docID, double newScore)
     {
         for( PostingsEntry pe : list )
