@@ -35,6 +35,7 @@ public interface Index {
     public HashMap<String,Integer> docLengths = new HashMap<String,Integer>();
     public HashMap<Integer, HashSet<String>> terms = new HashMap<Integer, HashSet<String>>();
 
+    public boolean SPEED_UP = false;
     public void insert( String token, int docID, int offset );
     public PostingsList getPostings( String token );
     public PostingsList search( Query query, int queryType, int rankingType );

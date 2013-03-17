@@ -318,7 +318,7 @@ public class MegaIndex implements Index {
                 {
                     String term = query.terms.get(i);
                     PostingsList pl = getPostings(term);
-                    if(pl != null && (double) numberOfDocs / IE_THRESHOLD > pl.size())
+                    if(pl != null && (double) numberOfDocs / IE_THRESHOLD > pl.size() || !Index.SPEED_UP)
                     {
                         result = PostingsList.union(result, pl);
                         i++;

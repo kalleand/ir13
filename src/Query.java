@@ -95,7 +95,7 @@ public class Query {
                 {
                     PostingsList pl = indexer.index.getPostings(term);
                     double numberOfDocs = indexer.index.getNumberOfDocs();
-                    if(numberOfDocs / Index.IE_THRESHOLD < pl.size()) 
+                    if(numberOfDocs / Index.IE_THRESHOLD < pl.size() && Index.SPEED_UP) 
                     {
                         continue;
                     }
