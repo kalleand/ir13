@@ -75,6 +75,33 @@ public class PostingsList implements Comparable<PostingsList>, Serializable {
             i++;
         }
     }
+    public void merge_pl(PostingsList other, double weight) {
+        int i = 0;
+        int j = 0;
+        while (i < size() && j < other.size()) {
+            PostingsEntry a = get(i);
+            PostingsEntry b = other.get(j);
+            int ai = a.docID;
+            int bj = b.docID;
+            if (bj < ai) {
+                list.add(i, b);
+                i++;
+                j++;
+            } else if (bj > ai) {
+                i++;
+            } else { // the same document. keep the old one.
+                a.score += b.score * weight;
+                a.score /= 2;
+                i++;
+                j++;
+            }
+        }
+        while (j < other.size()) {
+            list.add(i, other.get(j));
+            j++;
+            i++;
+        }
+    }
 
     /** Adds a new offset entry to the PostingsEntry that has the specified docID */
     public void add(int docID, int offset) {

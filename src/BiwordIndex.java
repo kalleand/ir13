@@ -11,8 +11,8 @@ public class BiwordIndex implements Index
 
     private static final double PAGERANK_WEIGHT = 7;
     private static final String pathToLinks = "svwiki_links/links10000.txt";
-    private HashMap<String, Double> pageranks = new HashMap<String, Double>();
     public int numberOfDocs = -2;
+    private HashMap<String, Double> pageranks = new HashMap<String, Double>();
 
     public BiwordIndex()
     {
@@ -20,6 +20,10 @@ public class BiwordIndex implements Index
         PageRank pr = new PageRank(pathToLinks);
         pageranks = pr.getPagerank();
         System.err.println("Done creating PageRank!");
+    }
+    
+    public BiwordIndex(int input)
+    {
     }
 
     public void insert(String token, int docID, int offset)
@@ -49,6 +53,13 @@ public class BiwordIndex implements Index
     }
 
     public PostingsList search(Query query, int queryType, int rankingType)
+    {
+        PostingsList ret = search_wo_sort(query, queryType, rankingType);
+        if(ret != null)
+            Collections.sort(ret.list);
+        return ret;
+    }
+    public PostingsList search_wo_sort(Query query, int queryType, int rankingType)
     {
         if(numberOfDocs < 0)
         {
@@ -159,7 +170,7 @@ public class BiwordIndex implements Index
                             * PAGERANK_WEIGHT);
                 }
             }
-            Collections.sort(result.list);
+            //Collections.sort(result.list);
             System.out.println("This query took " + (System.nanoTime() - startTime));
             return result;
         }
@@ -201,5 +212,10 @@ public class BiwordIndex implements Index
             return null;
         else
             return "{" + a + "+" + b + "}";
+    }
+
+    public void setPagerank(HashMap<String, Double> new_pr)
+    {
+        pageranks = new_pr;
     }
 }

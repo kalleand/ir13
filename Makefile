@@ -31,6 +31,9 @@ clean:
 brun: build
 	java -Xmx1024m -cp .:pdfbox:megamap ir.SearchGUI -d svwiki/files/$(FILES) -b
 
+xrun: build
+	java -Xmx1024m -cp .:pdfbox:megamap ir.SearchGUI -d svwiki/files/$(FILES) -x
+
 move:
 ifdef INDEX
 	mv $(INDEX).index $(FILES).index

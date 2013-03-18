@@ -61,6 +61,8 @@ public class Indexer {
             index = new HashedIndex();
         else if(type == Index.BIWORD_INDEX)
             index = new BiwordIndex();
+        else if(type == Index.DUAL_INDEX)
+            index = new DualIndex();
     }
 
     /** 

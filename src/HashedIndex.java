@@ -50,6 +50,9 @@ public class HashedIndex implements Index {
     }
 
 
+    public PostingsList search_wo_sort( Query query, int queryType, int rankingType ) {
+        return null;
+    }
     /**
      *  Searches the index for postings matching the query.
      */
@@ -108,5 +111,9 @@ public class HashedIndex implements Index {
     public void addTerm(int docID, String token)
     {
         // Not implemented for HashedIndex.
+    }
+
+    public void setPagerank(HashMap<String, Double> new_pr)
+    {
     }
 }

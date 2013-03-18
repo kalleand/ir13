@@ -47,10 +47,9 @@ public class MegaIndex implements Index {
 
     private static final double PAGERANK_WEIGHT = 7;
 
-    private HashMap<String, Double> pageranks = new HashMap<String, Double>();
-
     public int numberOfDocs = -2;
 
+    private HashMap<String, Double> pageranks = new HashMap<String, Double>();
     /**
      *  Create a new index and invent a name for it.
      */
@@ -68,7 +67,6 @@ public class MegaIndex implements Index {
         }
     }
 
-
     /**
      *  Create a MegaIndex, possibly from a list of smaller
      *  indexes.
@@ -85,6 +83,61 @@ public class MegaIndex implements Index {
                 pageranks = pr.getPagerank();
                 System.err.println("Done creating PageRank!");
 
+            }
+            else if ( indexfiles.size() == 1 ) {
+                // Read the specified index from file
+                index = manager.createMegaMap( indexfiles.get(0), path, true, false );
+                HashMap<String,String> m = (HashMap<String,String>)index.get( "..docIDs" );
+                if ( m == null ) {
+                    System.err.println( "Couldn't retrieve the associations between docIDs and document names" );
+                }
+                else {
+                    docIDs.putAll( m );
+                }
+                HashMap<String,Integer> n = (HashMap<String, Integer>)index.get( "..docLengths" );
+                if( n == null )
+                {
+                    System.err.println( "Could not retrieve the length of the documents." );
+                }
+                else
+                {
+                    docLengths.putAll(n);
+                }
+                HashMap<String,Double> k = (HashMap<String, Double>)index.get( "..pageranks" );
+                if( k == null )
+                {
+                    System.err.println( "Could not retrieve the pageranks of the documents." );
+                }
+                else
+                {
+                    pageranks.putAll(k);
+                }
+            }
+            else {
+                // Merge the specified index files into a large index.
+                MegaMap[] indexesToBeMerged = new MegaMap[indexfiles.size()];
+                for ( int k=0; k<indexfiles.size(); k++ ) {
+                    System.err.println( indexfiles.get(k) );
+                    indexesToBeMerged[k] = manager.createMegaMap( indexfiles.get(k), path, true, false );
+                }
+                index = merge( indexesToBeMerged );
+                for ( int k=0; k<indexfiles.size(); k++ ) {
+                    manager.removeMegaMap( indexfiles.get(k) );
+                }
+            }
+        }
+        catch ( Exception e ) {
+            e.printStackTrace();
+        }
+    }
+
+    public MegaIndex( LinkedList<String> indexfiles, int input) {
+        try {
+            manager = MegaMapManager.getMegaMapManager();
+            if ( indexfiles.size() == 0 ) {
+                // No index file names specified. Construct a new index and
+                // invent a name for it.
+                index = manager.createMegaMap( generateFilename(), path, true, false );
             }
             else if ( indexfiles.size() == 1 ) {
                 // Read the specified index from file
@@ -261,10 +314,16 @@ public class MegaIndex implements Index {
     }
 
 
+    public PostingsList search( Query query, int queryType, int rankingType ) {
+        PostingsList ret = search_wo_sort(query, queryType, rankingType);
+        if(ret != null)
+            Collections.sort(ret.list);
+        return ret;
+    }
     /**
      *  Searches the index for postings matching the query.
      */
-    public PostingsList search( Query query, int queryType, int rankingType ) {
+    public PostingsList search_wo_sort(Query query, int queryType, int rankingType) {
         if(index == null) {
             return null;
         }
@@ -319,7 +378,7 @@ public class MegaIndex implements Index {
             }
             else if(queryType == Index.RANKED_QUERY)
             {
-                long startTime = System.nanoTime();
+                 long startTime = System.nanoTime();
 
                 PostingsList result = new PostingsList();
                 int i = 0;
@@ -377,7 +436,7 @@ public class MegaIndex implements Index {
                                 * PAGERANK_WEIGHT);
                     }
                 }
-                Collections.sort(result.list);
+                //Collections.sort(result.list);
                 System.out.println("This query took " + (System.nanoTime() - startTime));
                 return result;
             }
@@ -405,5 +464,10 @@ public class MegaIndex implements Index {
             terms.put(docID, tmp);
         }
         tmp.add(token);
+    }
+
+    public void setPagerank(HashMap<String, Double> new_pr)
+    {
+        pageranks = new_pr;
     }
 }

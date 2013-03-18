@@ -371,6 +371,11 @@ public class SearchGUI extends JFrame {
                 i++;
                 indexType = Index.BIWORD_INDEX;
             }
+            else if("-x".equals(args[i]))
+            {
+                i++;
+                indexType = Index.DUAL_INDEX;
+            }
             else {
                 System.err.println( "Unknown option: " + args[i] );
                 break;
@@ -380,13 +385,14 @@ public class SearchGUI extends JFrame {
         //  should be carried out (it would result in a NullPointerException).
         //  Therefore the access to the index must be synchronized.
         synchronized ( indexLock ) {
-            if ( indexType == Index.HASHED_INDEX || indexType == Index.BIWORD_INDEX) {
+            if ( indexType == Index.HASHED_INDEX || indexType == Index.DUAL_INDEX 
+                    || indexType == Index.BIWORD_INDEX) {
                 resultWindow.setText("Hej Christian!");
                 indexer = new Indexer(indexType);
             }
             else {
                 resultWindow.setText( "\n  Creating MegaIndex, please wait... " );
-                indexer = new Indexer( indexFiles );
+                indexer = new Indexer(indexFiles);
                 resultWindow.setText( "\n  Done!" );
             }
         }
