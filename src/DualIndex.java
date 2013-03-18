@@ -8,7 +8,7 @@ public class DualIndex implements Index
     private BiwordIndex bi_index = new BiwordIndex(1);
     private MegaIndex mega_index = new MegaIndex(new LinkedList<String>(), 1);
 
-    private static final double PAGERANK_WEIGHT = 7;
+    private static final double MEGA_WEIGHT = 2;
     private static final String pathToLinks = "svwiki_links/links10000.txt";
     public int numberOfDocs = -2;
     private HashMap<String, Double> pageranks = new HashMap<String, Double>();
@@ -31,7 +31,7 @@ public class DualIndex implements Index
 
     public PostingsList getPostings(String token)
     {
-        return null;
+        return mega_index.getPostings(token);
     }
 
     public PostingsList search_wo_sort(Query query, int queryType, int rankingType)
@@ -56,9 +56,9 @@ public class DualIndex implements Index
         }
         else
         {
-            mega_list.merge_pl(bi_list, 2.0);
-            Collections.sort(bi_list.list);
-            return bi_list;
+            mega_list.merge_pl(bi_list, MEGA_WEIGHT);
+            Collections.sort(mega_list.list);
+            return mega_list;
         }
     }
 
@@ -77,6 +77,13 @@ public class DualIndex implements Index
 
     public void addTerm(int docID, String token)
     {
+        HashSet<String> tmp = terms.get(docID);
+        if(tmp == null)
+        {
+            tmp = new HashSet<String>();
+            terms.put(docID, tmp);
+        }
+        tmp.add(token);
     }
 
     public void setPagerank(HashMap<String, Double> new_pr)
