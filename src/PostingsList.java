@@ -97,6 +97,7 @@ public class PostingsList implements Comparable<PostingsList>, Serializable {
             }
         }
         while (j < other.size()) {
+            other.get(j).score += weight;
             list.add(i, other.get(j));
             j++;
             i++;
