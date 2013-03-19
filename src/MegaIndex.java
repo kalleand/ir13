@@ -341,7 +341,7 @@ public class MegaIndex implements Index {
                         return null; 
                     else
                     {
-                        if((double) numberOfDocs / IE_THRESHOLD > tmp.size() || !Index.SPEED_UP)
+                        if(!Index.SPEED_UP || (double) numberOfDocs / IE_THRESHOLD > tmp.size())
                             queue.add(tmp);
                     }
                 }
@@ -352,12 +352,14 @@ public class MegaIndex implements Index {
                     result = PostingsList.intersect_query(result, queue.pollFirst());
                 }
                 return result;
-            } else if(queryType == Index.PHRASE_QUERY) {
+            }
+            else if(queryType == Index.PHRASE_QUERY)
+            {
                 PostingsList result = new PostingsList();
                 while(query.size() != 0)
                 {
                     PostingsList tmp = (PostingsList)index.get(query.terms.pollFirst());
-                    if(tmp != null && ((double) numberOfDocs / IE_THRESHOLD > tmp.size() || !Index.SPEED_UP))
+                    if(tmp != null && (!Index.SPEED_UP || (double) numberOfDocs / IE_THRESHOLD > tmp.size()))
                     {
                         result = tmp;
                         break;
@@ -365,11 +367,12 @@ public class MegaIndex implements Index {
                     else
                         continue;
                 }
-                while(query.size() != 0) {
+                while(query.size() != 0)
+                {
                     PostingsList tmp = (PostingsList)index.get(query.terms.pollFirst());
                     if(tmp == null)
                         return null;
-                    else if((double) numberOfDocs / IE_THRESHOLD > tmp.size() || !Index.SPEED_UP)
+                    else if(!Index.SPEED_UP || (double) numberOfDocs / IE_THRESHOLD > tmp.size())
                         result = PostingsList.phrase_query(result, tmp);
                     else
                         result = PostingsList.add_wildcard(result);
@@ -386,7 +389,7 @@ public class MegaIndex implements Index {
                 {
                     String term = query.terms.get(i);
                     PostingsList pl = getPostings(term);
-                    if(pl != null && ((double) numberOfDocs / IE_THRESHOLD > pl.size() || !Index.SPEED_UP))
+                    if(pl != null && (!Index.SPEED_UP || (double) numberOfDocs / IE_THRESHOLD > pl.size()))
                     {
                         result = PostingsList.union(result, pl);
                         i++;
@@ -407,7 +410,7 @@ public class MegaIndex implements Index {
                         double idf = Math.log10( numberOfDocs / tmp.size() );
 
                         double wtq = query.weights.get(term) * idf;
-                        for ( PostingsEntry pe : tmp.list )
+                        for(PostingsEntry pe : tmp.list)
                         {
                             if(pe.offsets.size() != 0)
                             {

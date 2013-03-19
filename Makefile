@@ -21,7 +21,7 @@ endif
 irun: build
 	java -Xmx1024m -cp .:pdfbox:megamap ir.SearchGUI -i $(FILES) -m
 
-drun:
+drun: build
 	java -Xmx1024m -cp .:pdfbox:megamap ir.SearchGUI -d svwiki/files/$(FILES) -m
 
 clean:

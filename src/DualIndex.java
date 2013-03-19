@@ -8,7 +8,7 @@ public class DualIndex implements Index
     private BiwordIndex bi_index = new BiwordIndex(1);
     private MegaIndex mega_index = new MegaIndex(new LinkedList<String>(), 1);
 
-    private static final double MEGA_WEIGHT = 2;
+    private static final double MEGA_WEIGHT = 1;
     private static final String pathToLinks = "svwiki_links/links10000.txt";
     public int numberOfDocs = -2;
     private HashMap<String, Double> pageranks = new HashMap<String, Double>();

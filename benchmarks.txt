@@ -1,0 +1,7 @@
+Ranked retreival query with speedup took 1183203
+Relevance feedback query with speedup took 53238803
+
+
+Ranked reteival query without speedup took 1110363
+Relevance feedback query without speedup took 227188344
+

@@ -84,14 +84,14 @@ public class PostingsList implements Comparable<PostingsList>, Serializable {
             int ai = a.docID;
             int bj = b.docID;
             if (bj < ai) {
+                b.score += weight;
                 list.add(i, b);
                 i++;
                 j++;
             } else if (bj > ai) {
                 i++;
             } else { // the same document. keep the old one.
-                a.score += b.score * weight;
-                a.score /= 2;
+                a.score += b.score + weight;
                 i++;
                 j++;
             }
