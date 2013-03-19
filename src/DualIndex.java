@@ -9,6 +9,7 @@ public class DualIndex implements Index
     private MegaIndex mega_index = new MegaIndex(new LinkedList<String>(), 1);
 
     private static final double MEGA_WEIGHT = 1;
+    private static final double K_LIMIT = 10;
     private static final String pathToLinks = "svwiki_links/links10000.txt";
     public int numberOfDocs = -2;
     private HashMap<String, Double> pageranks = new HashMap<String, Double>();
@@ -41,6 +42,11 @@ public class DualIndex implements Index
     public PostingsList search(Query query, int queryType, int rankingType)
     {
         PostingsList bi_list = bi_index.search_wo_sort(query, queryType, rankingType);
+        if(bi_list != null && bi_list.list.size() > K_LIMIT)
+        {
+            Collections.sort(bi_list.list);
+            return bi_list;
+        }
         PostingsList mega_list = mega_index.search_wo_sort(query, queryType, rankingType);
         if(bi_list == null && mega_list == null)
             return null;
