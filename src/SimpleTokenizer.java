@@ -21,7 +21,7 @@ public class SimpleTokenizer {
 
     /** The reader from where tokens are read. */
     Reader reader;
-    
+
     /** 
      *  Characters are read @code{BUFFER_LENGTH} characters at a
      *  time into @code{buf}.
@@ -42,19 +42,19 @@ public class SimpleTokenizer {
 
     /** Handling of non-standard characters */
     static final char[] special_char =
-    { 'á', 'à', 'â', 'å', 'ä', 'é', 'è', 'ê', 'í', 'ñ', 'ö', 'ô', 'ü', 'ú', 'ù', 'û', 'Å', 'Ä', 'Ö', 165, 164, 8222, 182, 184, 732, 8211, 195 };
+    { 'Ã¡', 'Ã ', 'Ã¢', 'Ã¥', 'Ã¤', 'Ã©', 'Ã¨', 'Ãª', 'Ã­', 'Ã±', 'Ã¶', 'Ã´', 'Ã¼', 'Ãº', 'Ã¹', 'Ã»', 'Ã…', 'Ã„', 'Ã–', 165, 164, 8222, 182, 184, 732, 8211, 195 };
 
     /** 
      *  What special characters should be translated into. 
      *  NB: This array should have the same size as the one above!
      */
     static final char[] translation =
-    { 'a', 'a', 'a', 'å', 'ä', 'e', 'e', 'e', 'i', 'n', 'ö', 'o', 'ü', 'u', 'u', 'u', 'å', 'ä', 'ö', 'å', 'ä', 'ä', 'ö', 'ö', 'ö', 'ö', '#' };
+    { 'a', 'a', 'a', 'Ã¥', 'Ã¤', 'e', 'e', 'e', 'i', 'n', 'Ã¶', 'o', 'Ã¼', 'u', 'u', 'u', 'Ã¥', 'Ã¤', 'Ã¶', 'Ã¥', 'Ã¤', 'Ã¤', 'Ã¶', 'Ã¶', 'Ã¶', 'Ã¶', '#' };
 
 
 
     public SimpleTokenizer( Reader reader ) {
-	this.reader = reader;
+        this.reader = reader;
     }
 
 
@@ -64,13 +64,13 @@ public class SimpleTokenizer {
      *  whitespace.
      */
     public static String normalize( String s ) {
-	char[] buf = s.toCharArray(); 
-	for ( int i=0; i<buf.length; i++ ) {
-	    if ( !normalize( buf, i )) {
-		buf[i] = ' ';
-	    }
-	}
-	return new String( buf );
+        char[] buf = s.toCharArray(); 
+        for ( int i=0; i<buf.length; i++ ) {
+            if ( !normalize( buf, i )) {
+                buf[i] = ' ';
+            }
+        }
+        return new String( buf );
     }
 
 
@@ -84,24 +84,24 @@ public class SimpleTokenizer {
      */
 
     public static boolean normalize( char[] buf, int ptr ) {
-	char c = buf[ptr];
-	if (( c >= '0' && c <= '9' ) ||
-	    ( c >= 'a' && c <= 'z' )) {
-	    return true;
-	}
-	else if ( c >= 'A' && c <= 'Z' ) {
-	    buf[ptr] = (char)(c+32);
-	    return true;
-	}
-	else {
-	    for ( int i=0; i<special_char.length; i++ ) {
-		if ( special_char[i] == c ) {
-		    buf[ptr] = translation[i];
-		    return true;
-		}
-	    }
-	    return false;
-	}
+        char c = buf[ptr];
+        if (( c >= '0' && c <= '9' ) ||
+                ( c >= 'a' && c <= 'z' )) {
+            return true;
+                }
+        else if ( c >= 'A' && c <= 'Z' ) {
+            buf[ptr] = (char)(c+32);
+            return true;
+        }
+        else {
+            for ( int i=0; i<special_char.length; i++ ) {
+                if ( special_char[i] == c ) {
+                    buf[ptr] = translation[i];
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 
 
@@ -110,35 +110,35 @@ public class SimpleTokenizer {
      *  read, and @code{false} otherwise.
      */
     public boolean hasMoreTokens() throws IOException {
-	if ( !started_reading ) {
-	    nextTok = readToken();
-	    started_reading = true;
-	}
-	return ( nextTok != null );
+        if ( !started_reading ) {
+            nextTok = readToken();
+            started_reading = true;
+        }
+        return ( nextTok != null );
     }
-    
+
 
     /**
      *  @return a String containing the next token, or @code{null} if there
      *  are no more tokens.
      */
     public String nextToken() throws IOException { 
-	String s = null;
-	if ( !started_reading ) {
-	    s = readToken();
-	    if ( s != null ) {
-		s = s.replaceAll( "#", "" );
-		nextTok = readToken();
-	    }
-	    return s;
-	}
-	else {
-	    if ( nextTok != null ) {
-		s = nextTok.replaceAll( "#", "" );
-	    }
-	    nextTok = readToken();
-	    return s;
-	}
+        String s = null;
+        if ( !started_reading ) {
+            s = readToken();
+            if ( s != null ) {
+                s = s.replaceAll( "#", "" );
+                nextTok = readToken();
+            }
+            return s;
+        }
+        else {
+            if ( nextTok != null ) {
+                s = nextTok.replaceAll( "#", "" );
+            }
+            nextTok = readToken();
+            return s;
+        }
     }
 
 
@@ -146,59 +146,59 @@ public class SimpleTokenizer {
      *  Reads the next token. 
      */ 
     private String readToken() throws IOException {
-	if ( started_reading && buf[ptr] == 0 ) {
-	    // No more tokens to be read
-	    return null;
-	}
-	if ( !started_reading ) {
-	    refillBuffer( 0 );
-	    started_reading = true;
-	}
-	String token_found = null;
-	while ( buf[ptr] != 0 ) {
-	    if ( tokenStart < 0 ) {
-		if ( !normalize( buf, ptr )) {
-		    // Skip whitespace etc.
-		    ptr++;
-		}
-		else {
-		    // A token starts here
-		    tokenStart = ptr++;
-		}
-	    }
-	    else {
-		if ( normalize( buf, ptr )) {
-		    // We're in the middle of a token
-		    ptr++;
-		}
-		else {
-		    // End of token
-		    token_found = new String( buf, tokenStart, ptr-tokenStart );
-		    tokenStart = -1;
-		    ptr++;
-		}
-	    }
-	    if ( ptr == BUFFER_LENGTH ) {
-		// The buffer has been read, so refill it
-		if ( tokenStart >= 0 ) {
-		    // We're in the middle of a token. Copy the parts
-		    // of the token we have read already into the 
-		    // beginning of the buffer.
-		    java.lang.System.arraycopy( buf, tokenStart, buf, 0, BUFFER_LENGTH-tokenStart );
-		    refillBuffer( BUFFER_LENGTH-tokenStart );
-		    ptr = BUFFER_LENGTH-tokenStart;
-		    tokenStart = 0;
-		}
-		else {
-		    refillBuffer( 0 );
-		    ptr = 0;
-		}
-	    }
-	    if ( token_found != null ) {
-		return token_found;
-	    }
-	}
-	return null;
+        if ( started_reading && buf[ptr] == 0 ) {
+            // No more tokens to be read
+            return null;
+        }
+        if ( !started_reading ) {
+            refillBuffer( 0 );
+            started_reading = true;
+        }
+        String token_found = null;
+        while ( buf[ptr] != 0 ) {
+            if ( tokenStart < 0 ) {
+                if ( !normalize( buf, ptr )) {
+                    // Skip whitespace etc.
+                    ptr++;
+                }
+                else {
+                    // A token starts here
+                    tokenStart = ptr++;
+                }
+            }
+            else {
+                if ( normalize( buf, ptr )) {
+                    // We're in the middle of a token
+                    ptr++;
+                }
+                else {
+                    // End of token
+                    token_found = new String( buf, tokenStart, ptr-tokenStart );
+                    tokenStart = -1;
+                    ptr++;
+                }
+            }
+            if ( ptr == BUFFER_LENGTH ) {
+                // The buffer has been read, so refill it
+                if ( tokenStart >= 0 ) {
+                    // We're in the middle of a token. Copy the parts
+                    // of the token we have read already into the 
+                    // beginning of the buffer.
+                    java.lang.System.arraycopy( buf, tokenStart, buf, 0, BUFFER_LENGTH-tokenStart );
+                    refillBuffer( BUFFER_LENGTH-tokenStart );
+                    ptr = BUFFER_LENGTH-tokenStart;
+                    tokenStart = 0;
+                }
+                else {
+                    refillBuffer( 0 );
+                    ptr = 0;
+                }
+            }
+            if ( token_found != null ) {
+                return token_found;
+            }
+        }
+        return null;
     }
 
 
@@ -206,14 +206,9 @@ public class SimpleTokenizer {
      *  Refills the buffer and adds end_of_file "\0" at the appropriate place.
      */
     private void refillBuffer( int start ) throws IOException {
-	int chars_read = reader.read( buf, start, BUFFER_LENGTH-start );
-	if ( chars_read < BUFFER_LENGTH-start ) {
-	    buf[chars_read] = 0;
-	}
+        int chars_read = reader.read( buf, start, BUFFER_LENGTH-start );
+        if ( chars_read < BUFFER_LENGTH-start ) {
+            buf[chars_read] = 0;
+        }
     }
 }
-
-
-
-
-
